@@ -139,6 +139,14 @@ module.exports = {
             comName: 'createForm'
           },
           plain: true // 按钮样式
+        },{
+          label: '展示demo',
+          type: 'info',
+          eventKey: 'showComponent',
+          eventOption: { // 按钮配置
+            comName: 'demoComponent'
+          },
+          plain: true // 按钮样式
         }],
         rowButtons: [{
           label: '查看',
@@ -178,7 +186,8 @@ module.exports = {
         detailPanel: {
           mainKey: 'product_id',
           title: '查看商品'
-        }
+        },
+        demoComponent: {}
       }
     }
   }, {
