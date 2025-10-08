@@ -89,7 +89,7 @@ module.exports = {
             searchOption: {
               comType: 'input',
               placeholder: '请输入库存'
-            },
+            }, 
             createFormOption: {
               comType: 'select',
               enumList: [{

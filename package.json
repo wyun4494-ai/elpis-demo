@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
-    "@lesheng/elpis": "file:../elpis",
+    "@lesheng/elpis": "^1.0.0",
     "vue": "^3.5.21"
   }
 }
