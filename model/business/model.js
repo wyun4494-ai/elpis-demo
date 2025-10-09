@@ -18,7 +18,8 @@ module.exports = {
             label: '商品编号',
             tableOption: {
               width: 300,
-              'show-overflow-tooltip': true // 超出宽度显示 tooltip
+              'show-overflow-tooltip': true, // 超出宽度显示 tooltip
+              sortable: true
             },
             editFormOption: {
               comType: 'input',
