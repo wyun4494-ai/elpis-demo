@@ -1,0 +1,28 @@
+main:
+  push:
+    - name: CI
+      docker:
+        image: node:18
+      services:
+        - docker
+      env:
+        DOCKER_IMAGE_NAME: elpis-demo-image-beta
+        DOCKER_IMAGE_VERSION: ${CNB_BRANCH}-${CNB_COMMIT}
+        DOCKERFILE_PATH: ./publish/beta/Dockerfile
+        DOCKER_BUILD_CONTEXT: .
+      stages:
+        - name: 编译构建
+          script: npm install --production && npm run build:prod
+        - name: docker login
+          script: >
+            docker login ccr.ccs.tencentyun.com --username=
+            --password=
+        - name: 构建 docker 镜像
+          script: >
+            docker build -t
+            ccr.ccs.tencentyun.com/elpis-demo/elpis-demo:${DOCKER_IMAGE_VERSION}
+            -f ${DOCKERFILE_PATH} ${DOCKER_BUILD_CONTEXT}
+        - name: 推送镜像
+          script: >
+            docker push
+            ccr.ccs.tencentyun.com/elpis-demo/elpis-demo:${DOCKER_IMAGE_VERSION}
