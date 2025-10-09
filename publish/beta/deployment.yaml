@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ed-beta
+  name: ed-beta-deployment
+  namespace: elpis-demo-beta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ed-beta-pod
+  template:
+    metadata:
+      labels:
+        app: ed-beta-pod
+    spec:
+      containers:
+        - image: ccr.ccs.tencentyun.com/elpis-lesheng-demo/elpis-demo:publish-demo-588329e01dd8883c374f35084ec2af97718395f3
+          name: ed-beta-pod
+          ports: 
+            - containerPort: 8083
+      imagePullSecrets:
+        - name: tencentcloud-secret # 指定用于从私有仓库拉取镜像的密钥
