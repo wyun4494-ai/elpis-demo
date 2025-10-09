@@ -23,7 +23,7 @@ publish-demo:
           script: >-
             docker login ${DOCKER_REGISTRY} 
             --username=100044507806 
-            --password=${DOCKER_PASSWORD}
+            --password=4!EYjGe3RtFezsQ
         - name: 构建 docker 镜像
           # 镜像标签格式：仓库地址/命名空间/仓库名:版本（严格匹配腾讯云路径）
           script: >-
