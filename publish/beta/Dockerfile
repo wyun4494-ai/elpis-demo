@@ -14,16 +14,37 @@ COPY . /app/elpis-demo
 RUN npm install --production=false
 
 # 构建前端资源（直接使用 Linux 环境变量语法）
-RUN _ENV=production node ./build.js
+RUN echo "========== 开始构建前端资源 ==========" && \
+    _ENV=production node ./build.js && \
+    echo "========== 构建完成 =========="
 
-# 将构建产物从 dist/prod/ 移动到 dist/（生产环境构建输出在 dist/prod/）
+# 调试：检查构建产物位置
+RUN echo "========== 检查构建产物 ==========" && \
+    echo "检查 dist 目录结构:" && \
+    ls -la ./app/public/dist/ || echo "dist 目录不存在" && \
+    echo "" && \
+    echo "检查 dist/prod 目录:" && \
+    ls -la ./app/public/dist/prod/ || echo "dist/prod 目录不存在" && \
+    echo "" && \
+    echo "查找所有 .tpl 文件:" && \
+    find ./app/public -name "*.tpl" || echo "未找到任何 .tpl 文件"
+
+# 将构建产物从 dist/prod/ 复制到 dist/（如果存在）
 RUN if [ -d "./app/public/dist/prod" ]; then \
-      cp -r ./app/public/dist/prod/* ./app/public/dist/ && \
+      echo "========== 复制构建产物 ==========" && \
+      cp -rv ./app/public/dist/prod/* ./app/public/dist/ && \
       echo "✅ 前端资源已复制到 dist/ 目录"; \
+    else \
+      echo "⚠️ dist/prod 目录不存在，跳过复制"; \
     fi
 
-# 验证构建产物
-RUN ls -la ./app/public/dist/*.tpl || echo "⚠️ 警告: 未找到模板文件"
+# 最终验证
+RUN echo "========== 最终验证 ==========" && \
+    echo "dist 目录内容:" && \
+    ls -la ./app/public/dist/ && \
+    echo "" && \
+    echo "检查模板文件:" && \
+    ls -la ./app/public/dist/*.tpl || echo "❌ 错误: 未找到模板文件！"
 
 # 设置运行时环境变量
 ENV TimeZone=Asia/Shanghai
