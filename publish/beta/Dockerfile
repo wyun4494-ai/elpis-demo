@@ -18,8 +18,11 @@ RUN npm run build:prod
 
 # 设置环境变量
 ENV TimeZone=Asia/Shanghai
+ENV _ENV=beta
+ENV PORT=8083
 
 # 暴露端口
 EXPOSE 8083
 
-ENTRYPOINT npm run beta
+# 使用 node 直接启动，避免 Windows 的 set 命令问题
+CMD ["node", "server.js"]

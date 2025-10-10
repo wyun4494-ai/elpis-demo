@@ -4,14 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "set _ENV=local&& nodemon server.js",
-    "beta": "set _ENV=beta&& PORT=8083 node server.js",
-    "prod": "set _ENV=production&& node server.js",
-    "build:dev": "set _ENV=local&& node --max_old_space_size=4096 ./build.js",
-    "build:prod": "set _ENV=production&& node ./build.js"
+    "dev": "cross-env _ENV=local nodemon server.js",
+    "beta": "cross-env _ENV=beta PORT=8083 node server.js",
+    "prod": "cross-env _ENV=production node server.js",
+    "build:dev": "cross-env _ENV=local node --max_old_space_size=4096 ./build.js",
+    "build:prod": "cross-env _ENV=production node ./build.js"
   },
   "author": "lesheng",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "nodemon": "^3.1.10"
   },
   "dependencies": {
