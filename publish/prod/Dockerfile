@@ -13,9 +13,9 @@ COPY . /app/elpis-demo
 # 安装依赖
 RUN npm install --production=false
 
-# 构建前端资源（测试环境构建）
+# 构建前端资源（生产环境构建）
 RUN echo "========== 开始构建前端资源 ==========" && \
-    _ENV=local node ./build.js && \
+    _ENV=production node ./build.js && \
     echo "========== 构建完成 =========="
 
 # 调试：检查构建产物位置
@@ -48,7 +48,7 @@ RUN echo "========== 最终验证 ==========" && \
 
 # 设置运行时环境变量
 ENV TimeZone=Asia/Shanghai
-ENV _ENV=beta
+ENV _ENV=production
 ENV PORT=8083
 
 # 暴露端口

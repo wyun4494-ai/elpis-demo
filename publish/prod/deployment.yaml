@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ed-prod-deployment
+  namespace: elpis-demo-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ed-prod-pod
+  template:
+    metadata:
+      labels:
+        app: ed-prod-pod
+    spec:
+      containers:
+      - name: elpis-demo-prod
+        image: ccr.ccs.tencentyun.com/elpis-lesheng-demo/elpis-demo:publish-prod-latest
+        ports:
+        - containerPort: 8083
+        env:
+        - name: _ENV
+          value: "production"
+        - name: PORT
+          value: "8083"

@@ -1,3 +1,4 @@
+# 测试环境配置
 publish-demo:
   push:
     - name: CI
@@ -10,6 +11,43 @@ publish-demo:
         # 镜像版本：分支名-提交哈希（保持不变）
         DOCKER_IMAGE_VERSION: ${CNB_BRANCH}-${CNB_COMMIT}
         DOCKERFILE_PATH: ./publish/beta/Dockerfile
+        DOCKER_BUILD_CONTEXT: .
+        # 新增镜像仓库路径变量（与腾讯云仓库一致）
+        DOCKER_REGISTRY: ccr.ccs.tencentyun.com
+        DOCKER_NAMESPACE: elpis-lesheng-demo  # 腾讯云仓库命名空间
+        DOCKER_REPO: elpis-demo               # 腾讯云仓库名称
+      stages:
+        - name: docker login
+          # 登录命令与腾讯云快捷指令一致（用户名使用UIN）
+          script: >-
+            docker login ${DOCKER_REGISTRY} 
+            --username=100044507806 
+            --password=4!EYjGe3RtFezsQ
+        - name: 构建 docker 镜像
+          # 镜像标签格式：仓库地址/命名空间/仓库名:版本（严格匹配腾讯云路径）
+          script: >-
+            docker build -t 
+            ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_REPO}:${DOCKER_IMAGE_VERSION} 
+            -f ${DOCKERFILE_PATH} ${DOCKER_BUILD_CONTEXT}
+        - name: 推送镜像
+          # 推送路径与构建标签一致（确保能推送到腾讯云仓库）
+          script: >-
+            docker push 
+            ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_REPO}:${DOCKER_IMAGE_VERSION}
+
+# 生产环境配置
+publish-prod:
+  push:
+    - name: CI
+      docker:
+        image: node:18
+      services:
+        - docker
+      env:
+        DOCKER_IMAGE_NAME: elpis-demo-image-prod
+        # 镜像版本：分支名-提交哈希（保持不变）
+        DOCKER_IMAGE_VERSION: ${CNB_BRANCH}-${CNB_COMMIT}
+        DOCKERFILE_PATH: ./publish/prod/Dockerfile
         DOCKER_BUILD_CONTEXT: .
         # 新增镜像仓库路径变量（与腾讯云仓库一致）
         DOCKER_REGISTRY: ccr.ccs.tencentyun.com
