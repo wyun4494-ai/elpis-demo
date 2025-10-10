@@ -7,11 +7,15 @@ RUN mkdir -p /app/elpis-demo
 # 进入工作目录
 WORKDIR /app/elpis-demo
 
-# 复制代码内容到工作目录
-COPY . /app/elpis-demo
+# 先复制 package.json 文件，利用 Docker 缓存
+COPY package*.json /app/elpis-demo/
 
-# 安装依赖
-RUN npm install --production=false
+# 安装依赖（利用缓存，只有 package.json 变化时才重新安装）
+RUN npm config set registry https://registry.npmmirror.com && \
+    npm install --production=false
+
+# 再复制其他代码文件
+COPY . /app/elpis-demo
 
 # 构建前端资源（测试环境构建）
 RUN echo "========== 开始构建前端资源 ==========" && \
