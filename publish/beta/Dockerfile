@@ -13,10 +13,10 @@ COPY . /app/elpis-demo
 # 安装依赖
 RUN npm install --production=false
 
-# 构建前端资源
-RUN npm run build:prod
+# 构建前端资源（直接使用 Linux 环境变量语法）
+RUN _ENV=production node ./build.js
 
-# 设置环境变量
+# 设置运行时环境变量
 ENV TimeZone=Asia/Shanghai
 ENV _ENV=beta
 ENV PORT=8083
