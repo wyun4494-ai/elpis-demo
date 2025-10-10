@@ -51,8 +51,8 @@ publish-prod:
         DOCKER_BUILD_CONTEXT: .
         # 新增镜像仓库路径变量（与腾讯云仓库一致）
         DOCKER_REGISTRY: ccr.ccs.tencentyun.com
-        DOCKER_NAMESPACE: elpis-lesheng-demo  # 腾讯云仓库命名空间
-        DOCKER_REPO: elpis-demo               # 腾讯云仓库名称
+        DOCKER_NAMESPACE: elpis-lesheng-demo-prod  # 腾讯云仓库命名空间
+        DOCKER_REPO: elpis-demo-prod            # 腾讯云仓库名称
       stages:
         - name: docker login
           # 登录命令与腾讯云快捷指令一致（用户名使用UIN）
