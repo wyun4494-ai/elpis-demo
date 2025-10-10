@@ -8,5 +8,5 @@ spec:
     - port: 8083
       targetPort: 8083
   selector:
-    app: ed-beta
+    app: ed-beta-pod
   type: LoadBalancer
