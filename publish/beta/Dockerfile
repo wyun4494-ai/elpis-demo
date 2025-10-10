@@ -17,9 +17,9 @@ RUN npm config set registry https://registry.npmmirror.com && \
 # 再复制其他代码文件
 COPY . /app/elpis-demo
 
-# 构建前端资源（测试环境构建）
+# 构建前端资源（测试环境使用生产构建）
 RUN echo "========== 开始构建前端资源 ==========" && \
-    _ENV=local node ./build.js && \
+    _ENV=production node ./build.js && \
     echo "========== 构建完成 =========="
 
 # 调试：检查构建产物位置
