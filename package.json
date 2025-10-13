@@ -8,7 +8,10 @@
     "beta": "cross-env _ENV=beta PORT=8083 node server.js",
     "prod": "cross-env _ENV=production node server.js",
     "build:dev": "cross-env _ENV=local node --max_old_space_size=4096 ./build.js",
-    "build:prod": "cross-env _ENV=production node ./build.js"
+    "build:prod": "cross-env _ENV=production node ./build.js",
+    "setup:dev": "node scripts/switch-dependency.js dev && npm install",
+    "setup:prod": "node scripts/switch-dependency.js prod && npm install",
+    "update-elpis": "node scripts/switch-dependency.js prod"
   },
   "author": "lesheng",
   "devDependencies": {
@@ -35,7 +38,8 @@
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.1.0",
     "@babel/runtime": "^7.28.4",
-    "@lesheng/elpis": "^1.0.7",
+    "@lesheng/elpis": "file:../elpis",
+    "jsonwebtoken": "^9.0.2",
     "vue": "^3.5.21"
   }
 }

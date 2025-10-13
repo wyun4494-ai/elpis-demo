@@ -2,6 +2,7 @@ const { serverStart } = require('@lesheng/elpis');
 
 const app = serverStart({
   name: 'ElpisDemo',
+  icon: 'static/logo.png',
   homePage: '/view/project-list'
 })
 

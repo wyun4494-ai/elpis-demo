@@ -1,5 +1,6 @@
 module.exports = (app) => {
   return {
-    name: 'demo'
+    NORMAL: 1,
+    DELETE: -1
   }
 }
