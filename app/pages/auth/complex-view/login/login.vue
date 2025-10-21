@@ -67,8 +67,11 @@ const login = async () => {
 
   let path = '/view/project-list'
   if(location.search) {
-    const { search } = location
-    path = search.substr(search.indexOf('callback') + 10)
+    const urlParams = new URLSearchParams(location.search)
+    const callback = urlParams.get('callback')
+    if(callback) {
+      path = callback
+    }
   }
   window.location.href = `http://${window.location.host}${path}`
 }

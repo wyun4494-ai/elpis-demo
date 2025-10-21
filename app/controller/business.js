@@ -5,7 +5,7 @@ module.exports = (app) => {
     return new Promise(resolve => {
       setTimeout(() => {
         resolve()
-      }, Math.random() * 1000 )
+      }, Math.random() * ms )
     })
   }
 
@@ -15,7 +15,7 @@ module.exports = (app) => {
     async get(ctx) {
       const { product_id: productId } = ctx.query
 
-      await sleep(1000)
+      await sleep(500)
 
       const productList = this.getStaticProductList(ctx)
       const productItem = productList.find(item => item.product_id == productId)
@@ -31,7 +31,7 @@ module.exports = (app) => {
     async create(ctx) {
       const { product_name, product_price, inventory } = ctx.request.body
 
-      await sleep(1000)
+      await sleep(500)
 
       this.success(ctx, {
         message: '创建成功',
@@ -46,7 +46,7 @@ module.exports = (app) => {
     async update(ctx) {
       const { product_id: productId, product_name, product_price, inventory } = ctx.request.body
 
-      await sleep(1000)
+      await sleep(500)
 
       this.success(ctx, {
         message: '修改成功',
@@ -62,7 +62,7 @@ module.exports = (app) => {
 
       const { product_id: productId } = ctx.request.body
 
-      await sleep(1000)
+      await sleep(500)
 
       this.success(ctx, {
         message: '删除成功',
@@ -89,7 +89,7 @@ module.exports = (app) => {
         productList = productList.filter(item => item.inventory == inventory)
       }
 
-      await sleep(1000)
+      await sleep(500)
 
       this.success(ctx, productList, {
         total: productList.length,

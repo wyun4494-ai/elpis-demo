@@ -15,5 +15,10 @@ module.exports = {
       min: 2,
       max: 10
     }
+  },
+  apiSignVerify: {
+    whiteList: [
+      '/api/auth/logout'
+    ]
   }
 }

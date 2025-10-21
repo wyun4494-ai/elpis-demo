@@ -1,8 +1,8 @@
-import demoFormItem from './complex-view/demo-form-item/demo-form-item.vue'; 
+import Textarea from './complex-view/textarea/textarea.vue'
 
 const FormItemConfig = {
-  demoFormItem: {
-    component: demoFormItem
+  textarea: {
+    component: Textarea,
   }
 }
 

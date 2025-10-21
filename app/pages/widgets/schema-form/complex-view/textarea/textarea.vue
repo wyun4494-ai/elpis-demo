@@ -16,16 +16,17 @@
       >
         *
       </el-row>
-      {{ schema.label }}demo
+      {{ schema.label }}
     </el-row>
     <!-- value -->
     <el-row
       class="item-value"
     >
-      <el-input-number
+      <el-input
+        type="textarea"
+        :rows="5"
         v-model="dotValue"
         v-bind="schema.option"
-        :controls="false"
         class="component"
         :class=" validTips ? 'valid-border' : '' "
         :placeholder="placeholder"
@@ -62,7 +63,7 @@ const props = defineProps({
 const { schema, schemaKey} = props
 const { model } = toRefs(props)
 
-const name = ref('inputNumber')
+const name = ref('textarea')
 const dotValue = ref()
 const validTips = ref(null)
 const placeholder = ref('')
@@ -73,20 +74,20 @@ const initData = () => {
   dotValue.value = model.value !== undefined ? model.value : schema.option?.default
   validTips.value = null
 
-  const {
-    minium,
-    maximum
-  } = schema
+  const { minLength, maxLength, pattern } = schema
 
   const ruleList = []
   if(schema.option?.placeholder){
-    ruleList.value = schema.option.placeholder
+    placeholder.value = schema.option.placeholder
   }
-  if(minium !== undefined) {
-    ruleList.push(`最小值: ${minium}`)
+  if(minLength) {
+    ruleList.push(`最小长度: ${minLength}`)
   }
-  if(maximum !== undefined) {
-    ruleList.push(`最大值:${maximum}`)
+  if(maxLength) {
+    ruleList.push(`最大长度:${maxLength}`)
+  }
+  if(pattern) {
+    ruleList.push(`格式: ${pattern}`)
   }
 
   placeholder.value = ruleList.join('|')
@@ -119,7 +120,7 @@ const validate = () => {
   if(schema.option?.required && !dotValue.value){
     validTips.value = '请输入内容'
     return false
-  } 
+  }
 
   // 调用ajv校验schema
   if(dotValue.value) {
@@ -129,10 +130,12 @@ const validate = () => {
       const { keyword, params} = validate.errors[0]
       if(keyword === 'type') {
         validTips.value = `类型必须为${type}，请检查输入`
-      } else if(keyword === 'minimum') {
-        validTips.value = `数值不能小于${params.limit}`
-      } else if(keyword === 'maximum') {
-        validTips.value = `数值不能大于${params.limit}`
+      } else if(keyword === 'minLength') {
+        validTips.value = `长度不能小于${params.limit}`
+      } else if(keyword === 'maxLength') {
+        validTips.value = `长度不能大于${params.limit}`
+      } else if(keyword === 'pattern') {
+        validTips.value = `格式错误，请检查输入`
       } else {
         console.log(validate.errors[0])
         validTips.value = '格式错误，请检查输入'
@@ -160,7 +163,5 @@ defineExpose({
 </script>
 
 <style lang="less" scoped>
-:deep(.el-input-number .el-input__inner) {
-  text-align: left;
-}
+
 </style>

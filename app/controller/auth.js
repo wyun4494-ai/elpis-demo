@@ -31,5 +31,16 @@ module.exports = (app) => {
         nickname: userItem.nickname
       })
     }
+
+    async logout(ctx) {
+      // 清空cookie
+      ctx.cookies.set('token', '', {
+        httpOnly: true,
+        expires: new Date(0)
+      })
+      // 重定向到登录页
+      ctx.status = 302
+      ctx.redirect('/view/auth/login')
+    }
   }
 }

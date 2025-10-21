@@ -1,3 +1,4 @@
 module.exports = (app) => {
-  console.log('elpis-demo middleware')
+  // 登录太校验
+  app.use(app.middlewares.authTokenVerify)
 }

@@ -14,5 +14,10 @@ module.exports = {
         required: ['username', 'password'],
       }
     }
+  },
+  '/api/auth/logout': {
+    get: {
+      query: {}
+    }
   }
 }
