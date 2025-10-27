@@ -57,5 +57,18 @@ module.exports = {
   '/api/proj/stock-alert/statistics': {
     get: {}
   },
+  '/api/proj/stock-alert/restock': {
+    post: {
+      body: {
+        type: 'object',
+        properties: {
+          sku_id: { type: 'string' },
+          restock_quantity: { type: 'number' },
+          note: { type: 'string' },
+        },
+        required: ['sku_id', 'restock_quantity'],
+      }
+    }
+  },
 };
 

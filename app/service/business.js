@@ -276,6 +276,102 @@ module.exports = (app) => {
     }
 
     /**
+     * 获取商品的所有SKU
+     */
+    async getProductSkus(productId) {
+      const skus = await app.database('t_product_sku')
+        .where('product_id', productId)
+        .where('status', 1)
+        .orderBy('sku_code', 'asc')
+        .select('*');
+
+      // 计算每个SKU的库存状态
+      skus.forEach(sku => {
+        sku.stock_status = this.calculateSkuStockStatus(sku.inventory, sku.stock_alert);
+      });
+
+      return skus;
+    }
+
+    /**
+     * 计算单个SKU的库存状态
+     */
+    calculateSkuStockStatus(inventory, stockAlert) {
+      const inv = parseInt(inventory);
+      const alert = parseInt(stockAlert);
+      
+      if (inv === 0) {
+        return '⚫ 缺货';
+      } else if (inv <= alert * 0.5) {
+        return '🔴 严重';
+      } else if (inv < alert) {
+        return '🟠 警告';
+      } else {
+        return '🟢 正常';
+      }
+    }
+
+    /**
+     * 批量更新商品SKU
+     */
+    async updateProductSkus(productId, skus) {
+      if (!skus || skus.length === 0) {
+        return true;
+      }
+
+      // 获取商品的总库存限制
+      const product = await app.database('t_product')
+        .where('product_id', productId)
+        .first();
+      
+      if (!product) {
+        throw this.status.ERROR.PARAMS_ERROR('商品不存在');
+      }
+
+      // 获取当前所有SKU
+      const allSkus = await app.database('t_product_sku')
+        .where('product_id', productId)
+        .where('status', 1)
+        .select('sku_id', 'inventory');
+      
+      // 创建SKU库存映射（包含更新的值）
+      const skuInventoryMap = {};
+      allSkus.forEach(sku => {
+        skuInventoryMap[sku.sku_id] = parseInt(sku.inventory);
+      });
+      
+      // 应用更新的SKU库存值
+      skus.forEach(sku => {
+        if (skuInventoryMap.hasOwnProperty(sku.sku_id)) {
+          skuInventoryMap[sku.sku_id] = parseInt(sku.inventory) || 0;
+        }
+      });
+      
+      // 计算更新后的总库存
+      const totalSkuInventory = Object.values(skuInventoryMap).reduce((sum, inventory) => sum + inventory, 0);
+      
+      // 验证不超过总库存限制
+      if (totalSkuInventory > product.inventory) {
+        throw this.status.ERROR.PARAMS_ERROR(`SKU库存总和(${totalSkuInventory})不能超过商品总库存限制(${product.inventory})`);
+      }
+
+      // 逐个更新SKU
+      for (const sku of skus) {
+        await app.database('t_product_sku')
+          .where('sku_id', sku.sku_id)
+          .update({
+            price: sku.price,
+            promotion_price: sku.promotion_price,
+            inventory: sku.inventory,
+            stock_alert: sku.stock_alert,
+            update_time: new Date()
+          });
+      }
+
+      return true;
+    }
+
+    /**
      * 获取回收站商品详情
      */
     async getRecycleProduct(productId) {
@@ -317,6 +413,17 @@ module.exports = (app) => {
 
       // 生成商品ID
       const productId = `PROD${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+
+      // 验证SKU库存总和不超过总库存
+      if (skus && skus.length > 0 && inventory) {
+        const totalSkuInventory = skus.reduce((sum, sku) => {
+          return sum + (parseInt(sku.inventory) || 0);
+        }, 0);
+        
+        if (totalSkuInventory > inventory) {
+          throw this.status.ERROR.PARAMS_ERROR(`SKU库存总和(${totalSkuInventory})不能超过商品总库存(${inventory})`);
+        }
+      }
 
       // 如果选择了分类，获取分类的各层级ID
       let categoryLevels = {

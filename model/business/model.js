@@ -241,7 +241,8 @@ module.exports = {
                 type: 'string',
                 label: 'SKU库存',
                 tableOption: {
-                  width: 100
+                  width: 100,
+                  comType: 'skuStatus'
                 }
               },
               create_time: {
@@ -295,6 +296,11 @@ module.exports = {
               mainKey: 'product_id',
               title: '商品管理',
               saveBtnText: '保存商品'
+            },
+            skuEditDialog: {
+              mainKey: 'product_id',
+              title: '编辑SKU',
+              saveBtnText: '保存'
             },
             createForm: {
               title: '添加商品',
@@ -1219,8 +1225,17 @@ module.exports = {
               rowButtons: [{
                 label: '补货',
                 type: 'primary',
-                eventKey: 'restock'
+                eventKey: 'showComponent',
+                eventOption: {
+                  comName: 'restockDialog'
+                }
               }]
+            },
+            componentConfig: {
+              restockDialog: {
+                title: '库存补货',
+                saveBtnText: '确认补货'
+              }
             }
           }
         }]

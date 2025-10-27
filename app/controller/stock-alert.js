@@ -77,6 +77,21 @@ module.exports = (app) => {
 
       this.success(ctx, stats);
     }
+
+    /**
+     * 库存补货
+     */
+    async restock(ctx) {
+      const params = ctx.request.body;
+      const { stockAlert: stockAlertService } = app.service;
+
+      const result = await stockAlertService.restock(params);
+
+      this.success(ctx, {
+        message: '补货成功',
+        ...result
+      });
+    }
   };
 };
 

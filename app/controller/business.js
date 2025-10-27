@@ -216,5 +216,30 @@ module.exports = (app) => {
         product_id: productId
       });
     }
+
+    /**
+     * 获取商品的所有SKU
+     */
+    async getProductSkus(ctx) {
+      const { product_id: productId } = ctx.params;
+      const { business: businessService } = app.service;
+
+      const skus = await businessService.getProductSkus(productId);
+
+      this.success(ctx, skus);
+    }
+
+    /**
+     * 批量更新商品SKU
+     */
+    async updateProductSkus(ctx) {
+      const { product_id: productId } = ctx.params;
+      const { skus } = ctx.request.body;
+      const { business: businessService } = app.service;
+
+      await businessService.updateProductSkus(productId, skus);
+
+      this.success(ctx, { message: '更新成功' });
+    }
   };
 };

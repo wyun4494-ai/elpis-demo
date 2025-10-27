@@ -25,4 +25,8 @@ module.exports = (app, router) => {
   // 回收站操作路由（用于侧边栏按钮）
   router.post('/api/proj/product/recycle/restore', businessController.restore.bind(businessController));
   router.delete('/api/proj/product/recycle/permanent', businessController.permanentDelete.bind(businessController));
+
+  // SKU管理路由
+  router.get('/api/proj/product/:product_id/skus', businessController.getProductSkus.bind(businessController));
+  router.put('/api/proj/product/:product_id/skus', businessController.updateProductSkus.bind(businessController));
 };

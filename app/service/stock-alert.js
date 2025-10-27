@@ -282,6 +282,62 @@ module.exports = (app) => {
 
       return result;
     }
+
+    /**
+     * 库存补货
+     */
+    async restock(params) {
+      const { sku_id: skuId, restock_quantity: quantity, note = '' } = params;
+
+      if (!skuId) {
+        throw new Error('SKU ID不能为空');
+      }
+
+      if (!quantity || quantity <= 0) {
+        throw new Error('补货数量必须大于0');
+      }
+
+      // 获取当前SKU信息
+      const sku = await app.database('t_product_sku')
+        .where('sku_id', skuId)
+        .first();
+
+      if (!sku) {
+        throw new Error('SKU不存在');
+      }
+
+      // 更新SKU库存
+      const newInventory = parseInt(sku.inventory) + parseInt(quantity);
+      
+      await app.database('t_product_sku')
+        .where('sku_id', skuId)
+        .update({
+          inventory: newInventory,
+          update_time: new Date()
+        });
+
+      // 同步更新商品总库存（所有SKU库存之和）
+      const allSkus = await app.database('t_product_sku')
+        .where('product_id', sku.product_id)
+        .where('status', 1)
+        .select('inventory');
+      
+      const totalInventory = allSkus.reduce((sum, item) => sum + parseInt(item.inventory), 0);
+      
+      await app.database('t_product')
+        .where('product_id', sku.product_id)
+        .update({
+          inventory: totalInventory,
+          update_time: new Date()
+        });
+
+      return {
+        old_inventory: sku.inventory,
+        restock_quantity: quantity,
+        new_inventory: newInventory,
+        product_total_inventory: totalInventory
+      };
+    }
   };
 };
 
