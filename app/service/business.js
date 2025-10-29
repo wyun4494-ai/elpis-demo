@@ -109,6 +109,20 @@ module.exports = (app) => {
         // 确保状态字段是数字类型
         item.status = parseInt(item.status);
         item.shelf_status = parseInt(item.shelf_status);
+        
+        // 解析商品图片JSON
+        if (item.product_images) {
+          try {
+            item.product_images = typeof item.product_images === 'string' 
+              ? JSON.parse(item.product_images) 
+              : item.product_images;
+          } catch (error) {
+            console.error('Parse product_images error:', error);
+            item.product_images = [];
+          }
+        } else {
+          item.product_images = [];
+        }
 
         // 设置 SKU 库存状态
         item.sku_stock_status = skuStatusMap[item.product_id] || '🟢 正常';
@@ -235,6 +249,20 @@ module.exports = (app) => {
         // 确保状态字段是数字类型
         product.status = parseInt(product.status);
         product.shelf_status = parseInt(product.shelf_status);
+        
+        // 解析商品图片JSON
+        if (product.product_images) {
+          try {
+            product.product_images = typeof product.product_images === 'string' 
+              ? JSON.parse(product.product_images) 
+              : product.product_images;
+          } catch (error) {
+            console.error('Parse product_images error:', error);
+            product.product_images = [];
+          }
+        } else {
+          product.product_images = [];
+        }
         
         // 如果有分类，获取分类的完整名称
         if (product.category_id) {
@@ -407,6 +435,7 @@ module.exports = (app) => {
         item_number, 
         inventory, 
         shelf_status,
+        product_images,
         skus = [],
         params: productParams = {}
       } = params;
@@ -442,6 +471,7 @@ module.exports = (app) => {
       await app.database('t_product').insert({
         product_id: productId,
         product_name,
+        product_images: product_images ? JSON.stringify(product_images) : null,
         category_id: category_id || null,
         category_l1_id: categoryLevels.category_l1_id,
         category_l2_id: categoryLevels.category_l2_id,
@@ -503,7 +533,7 @@ module.exports = (app) => {
      * 更新商品
      */
     async updateProduct(params) {
-      const { product_id: productId, product_name, category_id, brand_id, price, item_number, inventory, shelf_status } = params;
+      const { product_id: productId, product_name, category_id, brand_id, price, item_number, inventory, shelf_status, product_images } = params;
 
       // 构建更新对象，只更新传入的字段
       const updateData = {
@@ -511,6 +541,7 @@ module.exports = (app) => {
       };
 
       if (product_name !== undefined) updateData.product_name = product_name;
+      if (product_images !== undefined) updateData.product_images = product_images ? JSON.stringify(product_images) : null;
       if (brand_id !== undefined) updateData.brand_id = brand_id;
       if (price !== undefined) updateData.price = price;
       if (item_number !== undefined) updateData.item_number = item_number;

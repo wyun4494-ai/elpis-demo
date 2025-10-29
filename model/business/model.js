@@ -33,6 +33,29 @@ module.exports = {
                 },
                 detailPanelOption: {}
               },
+              product_images: {
+                type: 'array',
+                label: '商品图片',
+                tableOption: {
+                  width: 100,
+                  comType: 'image',
+                  imageSize: 80
+                },
+                createFormOption: {
+                  comType: 'upload',
+                  uploadUrl: '/api/upload/product-image',
+                  accept: 'image/*',
+                  limit: 10,
+                  maxSize: 2048  // 2MB
+                },
+                editFormOption: {
+                  comType: 'upload',
+                  uploadUrl: '/api/upload/product-image',
+                  accept: 'image/*',
+                  limit: 10,
+                  maxSize: 2048
+                },
+              },
               product_name: {
                 type: 'string',
                 label: '商品名称',
@@ -133,13 +156,13 @@ module.exports = {
                 detailPanelOption: {}
               },
               price: {
-                type: 'number', 
-                label: '价格/货号',
+                type: 'number',
+                label: '价格',
                 tableOption: {
                   width: 180,
                   comType: 'priceItemNumber'
                 },
-                searchOption: { 
+                searchOption: {
                   label: '价格',
                   comType: 'input',
                   placeholder: '请输入价格'
@@ -178,7 +201,7 @@ module.exports = {
               },
               inventory: {
                 type: 'number',
-                label: '库存',
+                label: '总库存',
                 tableOption: {
                   width: 100,
                 },

@@ -44,6 +44,12 @@ module.exports = (app) => {
       const params = ctx.request.body;
       const { business: businessService } = app.service;
 
+      // 检查：如果创建时直接上架，需要验证库存
+      if (params.shelf_status === 1 && params.inventory === 0) {
+        this.fail(ctx, '总库存为0，不能上架', 400);
+        return;
+      }
+
       const productId = await businessService.createProduct(params);
 
       this.success(ctx, {
@@ -58,6 +64,15 @@ module.exports = (app) => {
     async update(ctx) {
       const params = ctx.request.body;
       const { business: businessService } = app.service;
+
+      // 检查：如果是上架操作，需要验证库存
+      if (params.shelf_status === 1) {
+        const product = await businessService.getProduct(params.product_id);
+        if (product && product.inventory === 0) {
+          this.fail(ctx, '总库存为0，不能上架', 400);
+          return;
+        }
+      }
 
       await businessService.updateProduct(params);
 

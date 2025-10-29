@@ -1,6 +1,5 @@
 module.exports = (app) => {
   const BaseService = require('@lesheng/elpis').Service.Base(app);
-  const moment = require('moment');
 
   return class AttributeService extends BaseService {
 
@@ -53,7 +52,7 @@ module.exports = (app) => {
         if (item.predefined_values) {
           try {
             item.predefined_values = JSON.parse(item.predefined_values);
-          } catch (e) {
+          } catch {
             item.predefined_values = [];
           }
         }
@@ -94,7 +93,7 @@ module.exports = (app) => {
       if (attr.predefined_values) {
         try {
           attr.predefined_values = JSON.parse(attr.predefined_values);
-        } catch (e) {
+        } catch {
           attr.predefined_values = [];
         }
       }
