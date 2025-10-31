@@ -223,7 +223,7 @@ module.exports = {
               },
               shelf_status: {
                 type: 'number',
-                label: '状态',
+                label: '标签',
                 tableOption: {
                   comType: 'switch',
                   activeValue: 1,
