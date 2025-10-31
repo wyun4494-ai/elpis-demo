@@ -1,3 +1,10 @@
+/**
+ * 商品管理服务
+ * 处理商品相关的业务逻辑和数据库操作
+ *
+ * @class BusinessService
+ * @extends BaseService
+ */
 module.exports = (app) => {
   const BaseService = require('@lesheng/elpis').Service.Base(app);
   const moment = require('moment');
@@ -6,40 +13,57 @@ module.exports = (app) => {
 
     /**
      * 获取商品列表（分页）
+     *
+     * @param {Object} params - 查询参数
+     * @param {string} [params.product_name] - 商品名称（模糊查询）
+     * @param {string} [params.category_id] - 分类ID（支持多级分类筛选）
+     * @param {string} [params.brand_id] - 品牌ID
+     * @param {number} [params.price] - 价格
+     * @param {string} [params.item_number] - 货号（模糊查询）
+     * @param {number} [params.inventory] - 库存
+     * @param {number} [params.shelf_status] - 上架状态（0-下架，1-上架）
+     * @param {string} [params.create_time_start] - 创建时间开始
+     * @param {string} [params.create_time_end] - 创建时间结束
+     * @param {number} [params.page=1] - 页码
+     * @param {number} [params.pageSize=10] - 每页数量
+     * @returns {Promise<Object>} 返回商品列表和分页信息
+     * @returns {Array} returns.list - 商品列表
+     * @returns {number} returns.total - 总数
+     * @returns {number} returns.page - 当前页码
+     * @returns {number} returns.pageSize - 每页数量
      */
     async getProductList(params) {
-      const { 
+      const {
         product_name: productName,
         category_id: categoryId,
         brand_id: brandId,
-        price, 
+        price,
         item_number: itemNumber,
         inventory,
         shelf_status: shelfStatus,
         create_time_start: createTimeStart,
         create_time_end: createTimeEnd,
-        page = 1, 
-        pageSize = 10 
+        page = 1,
+        pageSize = 10
       } = params;
 
       const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
-      // 构建查询条件
+      // 1. 构建查询条件
       let query = app.database('t_product').where('status', 1);
 
-      // 商品名称筛选（模糊查询）
+      // 2. 商品名称筛选（模糊查询）
       if (productName && productName !== 'all') {
         query = query.where('product_name', 'like', `%${productName}%`);
       }
 
-      // 分类筛选（包括该分类及所有子分类下的商品）
+      // 3. 分类筛选（包括该分类及所有子分类下的商品）
       if (categoryId) {
         const { category: categoryService } = app.service;
-        // 获取该分类信息
         const category = await categoryService.getCategory(categoryId);
-        
+
         if (category) {
-          // 根据层级筛选
+          // 根据分类层级筛选对应的字段（支持多级分类查询）
           if (category.level === 1) {
             query = query.where('category_l1_id', categoryId);
           } else if (category.level === 2) {
@@ -52,32 +76,32 @@ module.exports = (app) => {
         }
       }
 
-      // 品牌筛选
+      // 4. 品牌筛选
       if (brandId) {
         query = query.where('brand_id', brandId);
       }
 
-      // 价格筛选
+      // 5. 价格筛选
       if (price && price !== -999 && price !== '-999') {
         query = query.where('price', price);
       }
 
-      // 货号筛选（模糊查询）
+      // 6. 货号筛选（模糊查询）
       if (itemNumber) {
         query = query.where('item_number', 'like', `%${itemNumber}%`);
       }
 
-      // 库存筛选
+      // 7. 库存筛选
       if (inventory && inventory !== -999 && inventory !== '-999') {
         query = query.where('inventory', inventory);
       }
 
-      // 上架状态筛选
+      // 8. 上架状态筛选
       if (shelfStatus !== undefined && shelfStatus !== -999 && shelfStatus !== '-999') {
         query = query.where('shelf_status', parseInt(shelfStatus));
       }
 
-      // 时间范围筛选
+      // 9. 时间范围筛选
       if (createTimeStart) {
         query = query.where('create_time', '>=', createTimeStart);
       }
@@ -85,36 +109,39 @@ module.exports = (app) => {
         query = query.where('create_time', '<=', createTimeEnd);
       }
 
-      // 查询总数
+      // 10. 查询总数
       const totalResult = await query.clone().count('* as count').first();
       const total = totalResult ? totalResult.count : 0;
 
-      // 查询列表数据
+      // 11. 查询列表数据
       const list = await query
         .select('*')
         .orderBy('create_time', 'desc')
         .limit(parseInt(pageSize))
         .offset(offset);
 
-      // 批量获取所有商品的SKU状态（优化性能，避免N+1查询）
+      // 12. 批量获取所有商品的SKU库存状态（优化性能，避免N+1查询）
       const productIds = list.map(item => item.product_id);
       const skuStatusMap = await this.getBatchProductStockStatus(productIds);
 
-      // 格式化数据
+      // 13. 格式化数据
       list.forEach(item => {
+        // 格式化时间
         item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
+
         // 将 decimal 类型转换为数字
         item.price = parseFloat(item.price);
         item.inventory = parseInt(item.inventory);
+
         // 确保状态字段是数字类型
         item.status = parseInt(item.status);
         item.shelf_status = parseInt(item.shelf_status);
-        
+
         // 解析商品图片JSON
         if (item.product_images) {
           try {
-            item.product_images = typeof item.product_images === 'string' 
-              ? JSON.parse(item.product_images) 
+            item.product_images = typeof item.product_images === 'string'
+              ? JSON.parse(item.product_images)
               : item.product_images;
           } catch (error) {
             console.error('Parse product_images error:', error);
@@ -137,34 +164,52 @@ module.exports = (app) => {
     }
 
     /**
-     * 批量获取多个商品的 SKU 库存状态（优化性能）
+     * 批量获取多个商品的 SKU 库存状态（优化性能，避免 N+1 查询）
+     *
+     * 算法说明：
+     * 1. 一次性查询所有商品的所有 SKU（避免循环查询）
+     * 2. 按商品分组计算每个商品的库存预警级别
+     * 3. 返回最严重的预警状态
+     *
+     * 预警级别规则：
+     * - 🟢 正常：库存 ≥ 预警值
+     * - 🟠 警告：预警值 > 库存 > 预警值×50%
+     * - 🔴 严重：库存 ≤ 预警值×50%
+     * - ⚫ 缺货：库存 = 0
+     *
+     * @param {Array<string>} productIds - 商品ID列表
+     * @returns {Promise<Object>} 返回商品ID到库存状态的映射
+     * @example
+     * const statusMap = await getBatchProductStockStatus(['PROD001', 'PROD002']);
+     * // 结果：{ 'PROD001': '🟢 正常', 'PROD002': '🔴 严重' }
      */
     async getBatchProductStockStatus(productIds) {
       if (!productIds || productIds.length === 0) {
         return {};
       }
 
-      // 一次性查询所有商品的所有 SKU
+      // 1. 一次性查询所有商品的所有 SKU（批量查询，避免 N+1）
       const skus = await app.database('t_product_sku')
         .whereIn('product_id', productIds)
         .where('status', 1)
         .select('product_id', 'inventory', 'stock_alert');
 
-      // 按商品分组并计算状态
+      // 2. 按商品分组并计算状态
       const statusMap = {};
-      
+
       productIds.forEach(productId => {
         const productSkus = skus.filter(sku => sku.product_id === productId);
-        
+
         if (productSkus.length === 0) {
           statusMap[productId] = '🟢 正常';
           return;
         }
 
-        let hasOutOfStock = false;
-        let hasSevere = false;
-        let hasWarning = false;
+        let hasOutOfStock = false;  // 是否有缺货的 SKU
+        let hasSevere = false;       // 是否有严重预警的 SKU
+        let hasWarning = false;      // 是否有警告的 SKU
 
+        // 遍历该商品的所有 SKU，检查库存状态
         productSkus.forEach(sku => {
           const inventory = parseInt(sku.inventory);
           const alert = parseInt(sku.stock_alert);
@@ -178,7 +223,7 @@ module.exports = (app) => {
           }
         });
 
-        // 返回最严重的状态
+        // 3. 返回最严重的状态（优先级：缺货 > 严重 > 警告 > 正常）
         if (hasOutOfStock) {
           statusMap[productId] = '⚫ 缺货';
         } else if (hasSevere) {

@@ -98,12 +98,25 @@ module.exports = (app) => {
 
     /**
      * 创建分类
+     *
+     * 业务规则：
+     * 1. 同一父级下分类名称不能重复
+     * 2. 分类层级最多 4 级
+     * 3. 自动计算 category_path（如 /CAT001/CAT001001）
+     * 4. 自动计算 full_name（如 手机数码/手机/智能手机）
+     * 5. 自动更新父级的 has_children 标记
+     *
+     * @param {Object} params - 创建参数
+     * @param {string} params.category_name - 分类名称
+     * @param {string} [params.parent_id] - 父级分类ID（为空表示一级分类）
+     * @param {number} [params.sort_order=0] - 排序值
+     * @returns {Promise<string>} 返回新创建的分类ID
      */
     async createCategory(params) {
       const { category_name, parent_id, sort_order = 0 } = params;
       const status = 1;  // 分类默认启用
 
-      // 检查分类名称是否重复（同一父级下）
+      // 1. 检查分类名称是否重复（同一父级下）
       const existing = await app.database('t_product_category')
         .where('category_name', category_name)
         .where('parent_id', parent_id || null)
@@ -118,7 +131,7 @@ module.exports = (app) => {
       let category_path = '';
       let full_name = category_name;
 
-      // 如果有父级，计算层级和路径
+      // 2. 如果有父级，计算层级和路径
       if (parent_id) {
         const parent = await app.database('t_product_category')
           .where('category_id', parent_id)
@@ -135,22 +148,24 @@ module.exports = (app) => {
           throw new Error('分类层级不能超过4级');
         }
 
-        category_path = parent.category_path 
-          ? `${parent.category_path}/${parent_id}` 
+        // 计算分类路径（如 /CAT001/CAT001001）
+        category_path = parent.category_path
+          ? `${parent.category_path}/${parent_id}`
           : `/${parent_id}`;
-        
+
+        // 计算完整名称（如 手机数码/手机/智能手机）
         full_name = parent.full_name ? `${parent.full_name}/${category_name}` : category_name;
 
-        // 更新父级的 has_children 标记
+        // 3. 更新父级的 has_children 标记
         await app.database('t_product_category')
           .where('category_id', parent_id)
           .update({ has_children: 1 });
       }
 
-      // 生成分类ID
+      // 4. 生成分类ID（格式：CAT + 时间戳 + 随机字符串）
       const categoryId = `CAT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
 
-      // 插入新分类
+      // 5. 插入新分类
       await app.database('t_product_category').insert({
         category_id: categoryId,
         category_name,
@@ -158,7 +173,7 @@ module.exports = (app) => {
         level,
         category_path: category_path || `/${categoryId}`,
         full_name,
-        has_children: 0,
+        has_children: 0,  // 新创建的分类默认没有子分类
         sort_order: parseInt(sort_order),
         status: parseInt(status),
         create_time: new Date()

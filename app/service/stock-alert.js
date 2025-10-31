@@ -1,3 +1,16 @@
+/**
+ * 库存预警服务
+ * 处理库存预警相关的业务逻辑和数据库操作
+ *
+ * 预警级别说明：
+ * - 0-正常：库存 ≥ 预警值
+ * - 1-警告：预警值 > 库存 > 预警值×50%
+ * - 2-严重：库存 ≤ 预警值×50%
+ * - 3-缺货：库存 = 0
+ *
+ * @class StockAlertService
+ * @extends BaseService
+ */
 module.exports = (app) => {
   const BaseService = require('@lesheng/elpis').Service.Base(app);
   const { v4: uuidv4 } = require('uuid');
@@ -6,21 +19,41 @@ module.exports = (app) => {
   return class StockAlertService extends BaseService {
 
     /**
-     * 获取库存预警列表
+     * 获取库存预警列表（分页）
+     *
+     * 业务流程：
+     * 1. 查询所有 SKU（关联商品表）
+     * 2. 计算每个 SKU 的预警级别
+     * 3. 过滤掉正常库存的 SKU（level=0）
+     * 4. 根据筛选条件过滤
+     * 5. 内存分页返回结果
+     *
+     * @param {Object} params - 查询参数
+     * @param {string} [params.product_name] - 商品名称（模糊查询）
+     * @param {string} [params.category_id] - 分类ID
+     * @param {number} [params.alert_level] - 预警级别（1-警告，2-严重，3-缺货）
+     * @param {number} [params.is_handled] - 是否已处理（0-未处理，1-已处理）
+     * @param {number} [params.page=1] - 页码
+     * @param {number} [params.pageSize=50] - 每页数量
+     * @returns {Promise<Object>} 返回预警列表和分页信息
+     * @returns {Array} returns.list - 预警列表
+     * @returns {number} returns.total - 总数
+     * @returns {number} returns.page - 当前页码
+     * @returns {number} returns.pageSize - 每页数量
      */
     async getAlertList(params) {
-      const { 
+      const {
         product_name: productName,
         category_id: categoryId,
         alert_level: alertLevel,
         is_handled: isHandled,
-        page = 1, 
-        pageSize = 50 
+        page = 1,
+        pageSize = 50
       } = params;
 
       const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
-      // 查询所有需要预警的 SKU
+      // 1. 查询所有需要预警的 SKU（关联商品表）
       let query = app.database('t_product_sku as sku')
         .leftJoin('t_product as p', 'sku.product_id', 'p.product_id')
         .where('sku.status', 1)
@@ -49,9 +82,9 @@ module.exports = (app) => {
         )
         .orderBy('sku.inventory', 'asc');
 
-      // 计算每个 SKU 的预警级别
+      // 2. 计算每个 SKU 的预警级别并过滤
       const alertList = [];
-      
+
       for (const sku of allSkus) {
         const inventory = parseInt(sku.inventory);
         const stockAlert = parseInt(sku.stock_alert);
@@ -78,7 +111,7 @@ module.exports = (app) => {
         });
       }
 
-      // 分页
+      // 3. 内存分页
       const total = alertList.length;
       const list = alertList.slice(offset, offset + parseInt(pageSize));
 
@@ -92,9 +125,19 @@ module.exports = (app) => {
 
     /**
      * 计算库存预警级别
-     * @param {number} inventory 当前库存
-     * @param {number} stockAlert 预警阈值
-     * @returns {object} { level, label, color }
+     *
+     * 算法说明：
+     * - 库存 = 0 → 3-缺货（黑色）
+     * - 库存 ≤ 预警值×50% → 2-严重（红色）
+     * - 库存 < 预警值 → 1-警告（橙色）
+     * - 库存 ≥ 预警值 → 0-正常（绿色）
+     *
+     * @param {number} inventory - 当前库存
+     * @param {number} stockAlert - 预警阈值
+     * @returns {Object} 返回预警级别对象
+     * @returns {number} returns.level - 预警级别（0-3）
+     * @returns {string} returns.label - 预警标签（正常/警告/严重/缺货）
+     * @returns {string} returns.color - 预警颜色（success/warning/danger/black）
      */
     calculateAlertLevel(inventory, stockAlert) {
       if (inventory === 0) {
@@ -111,8 +154,18 @@ module.exports = (app) => {
 
     /**
      * 创建预警日志
+     *
+     * 业务规则：
+     * - 只记录需要预警的情况（level >= 1）
+     * - 自动计算预警级别
+     * - 记录商品名称、SKU名称、当前库存、预警阈值等信息
+     *
+     * @param {string} skuId - SKU ID
+     * @returns {Promise<string|null>} 返回日志ID，如果不需要预警则返回 null
+     * @throws {Error} 如果 SKU 不存在，抛出异常
      */
     async createAlertLog(skuId) {
+      // 1. 获取 SKU 信息
       const sku = await app.database('t_product_sku')
         .where('sku_id', skuId)
         .first();
@@ -121,17 +174,20 @@ module.exports = (app) => {
         throw new Error('SKU不存在');
       }
 
+      // 2. 获取商品信息
       const product = await app.database('t_product')
         .where('product_id', sku.product_id)
         .first();
 
+      // 3. 计算预警级别
       const alertLevel = this.calculateAlertLevel(sku.inventory, sku.stock_alert);
 
-      // 只记录需要预警的情况
+      // 4. 只记录需要预警的情况（level >= 1）
       if (alertLevel.level === 0) {
         return null;
       }
 
+      // 5. 插入预警日志
       const logId = uuidv4();
 
       await app.database('t_stock_alert_log').insert({
@@ -151,21 +207,36 @@ module.exports = (app) => {
     }
 
     /**
-     * 获取预警日志列表
+     * 获取预警日志列表（分页）
+     *
+     * @param {Object} params - 查询参数
+     * @param {string} [params.product_name] - 商品名称（模糊查询）
+     * @param {number} [params.alert_level] - 预警级别（1-警告，2-严重，3-缺货）
+     * @param {number} [params.is_handled] - 是否已处理（0-未处理，1-已处理）
+     * @param {string} [params.start_time] - 预警时间开始
+     * @param {string} [params.end_time] - 预警时间结束
+     * @param {number} [params.page=1] - 页码
+     * @param {number} [params.pageSize=50] - 每页数量
+     * @returns {Promise<Object>} 返回预警日志列表和分页信息
+     * @returns {Array} returns.list - 预警日志列表
+     * @returns {number} returns.total - 总数
+     * @returns {number} returns.page - 当前页码
+     * @returns {number} returns.pageSize - 每页数量
      */
     async getAlertLogList(params) {
-      const { 
+      const {
         product_name: productName,
         alert_level: alertLevel,
         is_handled: isHandled,
         start_time: startTime,
         end_time: endTime,
-        page = 1, 
-        pageSize = 50 
+        page = 1,
+        pageSize = 50
       } = params;
 
       const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
+      // 1. 构建查询条件
       let query = app.database('t_stock_alert_log');
 
       if (productName) {
@@ -188,16 +259,18 @@ module.exports = (app) => {
         query = query.where('alert_time', '<=', endTime);
       }
 
+      // 2. 查询总数
       const countResult = await query.clone().count('* as count').first();
       const total = countResult.count;
 
+      // 3. 查询列表数据
       const list = await query
         .select('*')
         .orderBy('alert_time', 'desc')
         .limit(parseInt(pageSize))
         .offset(offset);
 
-      // 格式化数据
+      // 4. 格式化时间
       list.forEach(item => {
         item.alert_time = moment(item.alert_time).format('YYYY-MM-DD HH:mm:ss');
         if (item.handle_time) {
@@ -215,6 +288,11 @@ module.exports = (app) => {
 
     /**
      * 处理预警
+     *
+     * @param {string} logId - 预警日志ID
+     * @param {string} handler - 处理人
+     * @param {string} [handleNote] - 处理备注
+     * @returns {Promise<boolean>} 返回 true
      */
     async handleAlert(logId, handler, handleNote) {
       await app.database('t_stock_alert_log')
@@ -231,6 +309,11 @@ module.exports = (app) => {
 
     /**
      * 批量处理预警
+     *
+     * @param {Array<string>} logIds - 预警日志ID列表
+     * @param {string} handler - 处理人
+     * @param {string} [handleNote] - 处理备注
+     * @returns {Promise<boolean>} 返回 true
      */
     async batchHandleAlert(logIds, handler, handleNote) {
       await app.database('t_stock_alert_log')
@@ -247,15 +330,26 @@ module.exports = (app) => {
 
     /**
      * 获取预警统计
+     *
+     * 统计说明：
+     * - 只统计未处理的预警（is_handled=0）
+     * - 按预警级别分组统计
+     *
+     * @returns {Promise<Object>} 返回预警统计数据
+     * @returns {number} returns.total - 总预警数
+     * @returns {number} returns.outOfStock - 缺货数（level=3）
+     * @returns {number} returns.severe - 严重数（level=2）
+     * @returns {number} returns.warning - 警告数（level=1）
      */
     async getAlertStatistics() {
-      // 统计各级别预警数量
+      // 1. 统计各级别预警数量（只统计未处理的）
       const stats = await app.database('t_stock_alert_log')
         .where('is_handled', 0)
         .select('alert_level')
         .count('* as count')
         .groupBy('alert_level');
 
+      // 2. 构建统计结果
       const result = {
         total: 0,
         outOfStock: 0,   // 缺货（level=3）
@@ -285,10 +379,27 @@ module.exports = (app) => {
 
     /**
      * 库存补货
+     *
+     * 业务流程：
+     * 1. 验证参数（SKU ID、补货数量）
+     * 2. 更新 SKU 库存（原库存 + 补货数量）
+     * 3. 同步更新商品总库存（所有 SKU 库存之和）
+     *
+     * @param {Object} params - 补货参数
+     * @param {string} params.sku_id - SKU ID
+     * @param {number} params.restock_quantity - 补货数量
+     * @param {string} [params.note] - 补货备注
+     * @returns {Promise<Object>} 返回补货结果
+     * @returns {number} returns.old_inventory - 原库存
+     * @returns {number} returns.restock_quantity - 补货数量
+     * @returns {number} returns.new_inventory - 新库存
+     * @returns {number} returns.product_total_inventory - 商品总库存
+     * @throws {Error} 如果参数无效或 SKU 不存在，抛出异常
      */
     async restock(params) {
       const { sku_id: skuId, restock_quantity: quantity, note = '' } = params;
 
+      // 1. 验证参数
       if (!skuId) {
         throw new Error('SKU ID不能为空');
       }
@@ -297,7 +408,7 @@ module.exports = (app) => {
         throw new Error('补货数量必须大于0');
       }
 
-      // 获取当前SKU信息
+      // 2. 获取当前SKU信息
       const sku = await app.database('t_product_sku')
         .where('sku_id', skuId)
         .first();
@@ -306,9 +417,9 @@ module.exports = (app) => {
         throw new Error('SKU不存在');
       }
 
-      // 更新SKU库存
+      // 3. 更新SKU库存（原库存 + 补货数量）
       const newInventory = parseInt(sku.inventory) + parseInt(quantity);
-      
+
       await app.database('t_product_sku')
         .where('sku_id', skuId)
         .update({
@@ -316,14 +427,14 @@ module.exports = (app) => {
           update_time: new Date()
         });
 
-      // 同步更新商品总库存（所有SKU库存之和）
+      // 4. 同步更新商品总库存（所有SKU库存之和）
       const allSkus = await app.database('t_product_sku')
         .where('product_id', sku.product_id)
         .where('status', 1)
         .select('inventory');
-      
+
       const totalInventory = allSkus.reduce((sum, item) => sum + parseInt(item.inventory), 0);
-      
+
       await app.database('t_product')
         .where('product_id', sku.product_id)
         .update({

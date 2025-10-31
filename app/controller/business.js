@@ -1,10 +1,22 @@
+/**
+ * 商品管理控制器
+ * 处理商品相关的 HTTP 请求（CRUD、上下架、回收站等）
+ *
+ * @class BusinessController
+ * @extends BaseController
+ */
 module.exports = (app) => {
   const BaseController = require('@lesheng/elpis').Controller.Base(app);
-  
+
   return class BusinessController extends BaseController {
 
     /**
      * 获取商品详情
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.query - 查询参数
+     * @param {string} ctx.query.product_id - 商品ID
+     * @returns {Promise<void>}
      */
     async get(ctx) {
       const { product_id: productId } = ctx.query;
@@ -22,6 +34,11 @@ module.exports = (app) => {
 
     /**
      * 获取回收站商品详情
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.query - 查询参数
+     * @param {string} ctx.query.product_id - 商品ID
+     * @returns {Promise<void>}
      */
     async getRecycleProduct(ctx) {
       const { product_id: productId } = ctx.query;
@@ -39,12 +56,22 @@ module.exports = (app) => {
 
     /**
      * 创建商品
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {string} ctx.request.body.product_name - 商品名称
+     * @param {string} ctx.request.body.category_id - 分类ID
+     * @param {string} ctx.request.body.brand_id - 品牌ID
+     * @param {number} ctx.request.body.price - 价格
+     * @param {number} ctx.request.body.inventory - 总库存
+     * @param {number} ctx.request.body.shelf_status - 上架状态（0-下架，1-上架）
+     * @returns {Promise<void>}
      */
     async create(ctx) {
       const params = ctx.request.body;
       const { business: businessService } = app.service;
 
-      // 检查：如果创建时直接上架，需要验证库存
+      // 业务规则：如果创建时直接上架，需要验证库存不能为0
       if (params.shelf_status === 1 && params.inventory === 0) {
         this.fail(ctx, '总库存为0，不能上架', 400);
         return;
@@ -60,12 +87,18 @@ module.exports = (app) => {
 
     /**
      * 修改商品
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {string} ctx.request.body.product_id - 商品ID
+     * @param {number} [ctx.request.body.shelf_status] - 上架状态（0-下架，1-上架）
+     * @returns {Promise<void>}
      */
     async update(ctx) {
       const params = ctx.request.body;
       const { business: businessService } = app.service;
 
-      // 检查：如果是上架操作，需要验证库存
+      // 业务规则：如果是上架操作，需要验证库存不能为0
       if (params.shelf_status === 1) {
         const product = await businessService.getProduct(params.product_id);
         if (product && product.inventory === 0) {
@@ -84,11 +117,17 @@ module.exports = (app) => {
 
     /**
      * 删除商品（软删除）
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {string} ctx.request.body.product_id - 商品ID
+     * @param {string} ctx.request.body.delete_reason - 删除原因
+     * @returns {Promise<void>}
      */
     async remove(ctx) {
       const { product_id: productId, delete_reason: deleteReason } = ctx.request.body;
       const { business: businessService } = app.service;
-      
+
       // 获取当前用户ID（从JWT Token中解析）
       const userId = ctx.userId || 'system';
 
@@ -101,7 +140,21 @@ module.exports = (app) => {
     }
 
     /**
-     * 获取商品列表
+     * 获取商品列表（分页）
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.query - 查询参数
+     * @param {string} [ctx.query.product_name] - 商品名称（模糊查询）
+     * @param {string} [ctx.query.category_id] - 分类ID
+     * @param {string} [ctx.query.brand_id] - 品牌ID
+     * @param {number} [ctx.query.price] - 价格
+     * @param {number} [ctx.query.inventory] - 库存
+     * @param {number} [ctx.query.shelf_status] - 上架状态（0-下架，1-上架）
+     * @param {string} [ctx.query.create_time_start] - 创建时间开始
+     * @param {string} [ctx.query.create_time_end] - 创建时间结束
+     * @param {number} [ctx.query.page=1] - 页码
+     * @param {number} [ctx.query.pageSize=10] - 每页数量
+     * @returns {Promise<void>}
      */
     async getProductList(ctx) {
       const params = ctx.query;
@@ -117,7 +170,10 @@ module.exports = (app) => {
     }
 
     /**
-     * 获取商品名称枚举列表
+     * 获取商品名称枚举列表（用于搜索下拉选择）
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @returns {Promise<void>}
      */
     async getProductNameEnum(ctx) {
       const { business: businessService } = app.service;
@@ -126,7 +182,10 @@ module.exports = (app) => {
     }
 
     /**
-     * 获取价格枚举列表
+     * 获取价格枚举列表（用于搜索下拉选择）
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @returns {Promise<void>}
      */
     async getPriceEnum(ctx) {
       const { business: businessService } = app.service;
@@ -135,7 +194,10 @@ module.exports = (app) => {
     }
 
     /**
-     * 获取库存枚举列表
+     * 获取库存枚举列表（用于搜索下拉选择）
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @returns {Promise<void>}
      */
     async getInventoryEnum(ctx) {
       const { business: businessService } = app.service;
