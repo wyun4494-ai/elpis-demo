@@ -55,23 +55,38 @@ CREATE TABLE IF NOT EXISTS `t_product_brand` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品品牌表';
 
 -- ================================================================
--- 3. 商品参数库表（预定义参数）
+-- 3. 参数分类表
+-- ================================================================
+CREATE TABLE IF NOT EXISTS `t_param_category` (
+  `category_id` VARCHAR(64) NOT NULL PRIMARY KEY COMMENT '分类ID',
+  `category_name` VARCHAR(50) NOT NULL COMMENT '分类名称',
+  `sort_order` INT DEFAULT 0 COMMENT '排序',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+
+  UNIQUE KEY `uk_category_name` (`category_name`),
+  KEY `idx_sort` (`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='参数分类表';
+
+-- ================================================================
+-- 4. 商品参数库表（预定义参数）
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_product_param_library` (
   `param_id` VARCHAR(64) NOT NULL PRIMARY KEY COMMENT '参数ID',
   `param_name` VARCHAR(50) NOT NULL COMMENT '参数名称',
   `param_type` VARCHAR(20) DEFAULT 'input' COMMENT '参数类型：input、select、checkbox',
   `param_values` TEXT COMMENT '预定义参数值（JSON数组）',
-  `param_category` VARCHAR(50) DEFAULT '基本参数' COMMENT '参数分类',
+  `param_category` VARCHAR(50) DEFAULT '基本参数' COMMENT '参数分类（关联 t_param_category.category_id）',
   `sort_order` INT DEFAULT 0 COMMENT '排序',
   `status` TINYINT DEFAULT 1 COMMENT '状态',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY `uk_name` (`param_name`),
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  UNIQUE KEY `uk_name_category` (`param_name`, `param_category`),
   KEY `idx_category` (`param_category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品参数库';
 
 -- ================================================================
--- 4. 分类属性表（SKU规格配置）
+-- 5. 分类属性表（SKU规格配置）
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_category_attribute` (
   `attr_id` VARCHAR(64) NOT NULL PRIMARY KEY COMMENT '属性ID',
@@ -87,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `t_category_attribute` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分类属性表（SKU规格）';
 
 -- ================================================================
--- 5. 分类参数关联表
+-- 6. 分类参数关联表
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_category_param` (
   `id` VARCHAR(64) NOT NULL PRIMARY KEY,
@@ -103,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `t_category_param` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分类参数关联表';
 
 -- ================================================================
--- 6. 商品表（SPU）
+-- 7. 商品表（SPU）
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_product` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -143,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `t_product` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品表';
 
 -- ================================================================
--- 7. 商品SKU表
+-- 8. 商品SKU表
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_product_sku` (
   `sku_id` VARCHAR(64) NOT NULL PRIMARY KEY COMMENT 'SKU ID',
@@ -166,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `t_product_sku` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品SKU表';
 
 -- ================================================================
--- 8. 商品参数值表
+-- 9. 商品参数值表
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_product_param_value` (
   `id` VARCHAR(64) NOT NULL PRIMARY KEY,
@@ -174,13 +189,13 @@ CREATE TABLE IF NOT EXISTS `t_product_param_value` (
   `param_id` VARCHAR(64) NOT NULL COMMENT '参数ID',
   `param_value` TEXT COMMENT '参数值',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  
+
   KEY `idx_product` (`product_id`),
   UNIQUE KEY `uk_product_param` (`product_id`, `param_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品参数值表';
 
 -- ================================================================
--- 9. 库存预警日志表
+-- 10. 库存预警日志表
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_stock_alert_log` (
   `log_id` VARCHAR(64) NOT NULL PRIMARY KEY COMMENT '日志ID',
@@ -194,7 +209,7 @@ CREATE TABLE IF NOT EXISTS `t_stock_alert_log` (
   `alert_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '预警时间',
   `handle_time` DATETIME COMMENT '处理时间',
   `handler` VARCHAR(64) COMMENT '处理人',
-  
+
   KEY `idx_product` (`product_id`),
   KEY `idx_sku` (`sku_id`),
   KEY `idx_handled` (`is_handled`),
@@ -203,7 +218,7 @@ CREATE TABLE IF NOT EXISTS `t_stock_alert_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存预警日志表';
 
 -- ================================================================
--- 10. 商品删除日志表
+-- 11. 商品删除日志表
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_product_delete_log` (
   `id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '自增主键',
@@ -212,14 +227,14 @@ CREATE TABLE IF NOT EXISTS `t_product_delete_log` (
   `operation_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
   `operation_by` VARCHAR(64) COMMENT '操作人ID',
   `delete_reason` VARCHAR(500) COMMENT '删除原因（仅删除操作有值）',
-  
+
   KEY `idx_product_id` (`product_id`),
   KEY `idx_operation_time` (`operation_time`),
   KEY `idx_operation_by` (`operation_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品删除日志表';
 
 -- ================================================================
--- 11. 用户表
+-- 12. 用户表
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_user` (
   `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID',

@@ -210,6 +210,31 @@ module.exports = (app) => {
         pageSize: result.pageSize
       });
     }
+
+    /**
+     * 创建参数（添加到参数库）
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {string} ctx.request.body.param_name - 参数名称
+     * @param {string} ctx.request.body.param_type - 参数类型
+     * @param {string} ctx.request.body.param_category - 参数分类
+     * @param {string} [ctx.request.body.param_values] - 预定义值（JSON字符串）
+     * @param {number} [ctx.request.body.sort_order] - 排序
+     * @returns {Promise<void>}
+     */
+    async createParam(ctx) {
+      const params = ctx.request.body;
+      const { type: typeService } = app.service;
+
+      try {
+        const paramId = await typeService.createParam(params);
+        this.success(ctx, { param_id: paramId });
+      } catch (error) {
+        app.logger.error('创建参数失败', error);
+        this.fail(ctx, error.message, 500);
+      }
+    }
   };
 };
 

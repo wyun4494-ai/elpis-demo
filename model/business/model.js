@@ -958,6 +958,160 @@ module.exports = {
                 }
               }
             }
+          }, {
+            key: 'param-library',
+            name: '参数库管理',
+            menuType: 'module',
+            moduleType: 'schema',
+            schemaConfig: {
+              api: '/api/proj/param-category',
+              schema: {
+                type: 'object',
+                properties: {
+                  category_id: {
+                    type: 'string',
+                    label: '分类ID',
+                    tableOption: {
+                      width: 180,
+                      'show-overflow-tooltip': true
+                    },
+                    editFormOption: {
+                      comType: 'input',
+                      disabled: true
+                    }
+                  },
+                  category_name: {
+                    type: 'string',
+                    label: '分类名称',
+                    tableOption: {
+                      width: 200
+                    },
+                    searchOption: {
+                      comType: 'input',
+                      placeholder: '请输入分类名称'
+                    },
+                    createFormOption: {
+                      comType: 'input',
+                      placeholder: '请输入分类名称',
+                      required: true
+                    },
+                    editFormOption: {
+                      comType: 'input',
+                      placeholder: '请输入分类名称',
+                      required: true
+                    }
+                  },
+                  param_count: {
+                    type: 'number',
+                    label: '参数数量',
+                    tableOption: {
+                      width: 120,
+                      align: 'center'
+                    }
+                  },
+                  sort_order: {
+                    type: 'number',
+                    label: '排序',
+                    tableOption: {
+                      width: 100,
+                      align: 'center'
+                    },
+                    createFormOption: {
+                      comType: 'input-number',
+                      min: 0,
+                      default: 0
+                    },
+                    editFormOption: {
+                      comType: 'input-number',
+                      min: 0
+                    }
+                  },
+                  create_time: {
+                    type: 'date',
+                    label: '创建时间',
+                    tableOption: {
+                      width: 180,
+                      align: 'center'
+                    }
+                  },
+                  update_time: {
+                    type: 'date',
+                    label: '更新时间',
+                    tableOption: {
+                      width: 180,
+                      align: 'center'
+                    }
+                  }
+                },
+                required: ['category_name']
+              },
+              tableConfig: {
+                headerButtons: [{
+                  label: '添加参数分类',
+                  type: 'primary',
+                  eventKey: 'showComponent',
+                  eventOption: { comName: 'createForm' },
+                  plain: true
+                }, {
+                  label: '新建参数',
+                  type: 'success',
+                  eventKey: 'showComponent',
+                  eventOption: { comName: 'createParamDialog' },
+                  plain: true
+                }],
+                rowButtons: [{
+                  label: '查看',
+                  type: 'primary',
+                  eventKey: 'showComponent',
+                  eventOption: {
+                    comName: 'viewParamsDrawer'
+                  }
+                }, {
+                  label: '编辑',
+                  type: 'warning',
+                  eventKey: 'showComponent',
+                  eventOption: {
+                    comName: 'editParamCategoryDrawer'
+                  }
+                }, {
+                  label: '删除',
+                  type: 'danger',
+                  eventKey: 'remove',
+                  eventOption: {
+                    params: {
+                      category_id: 'schema::category_id'
+                    }
+                  }
+                }]
+              },
+              componentConfig: {
+                createForm: {
+                  title: '添加参数分类',
+                  saveBtnText: '保存'
+                },
+                editForm: {
+                  mainKey: 'category_id',
+                  title: '编辑参数分类',
+                  saveBtnText: '保存'
+                },
+                viewParamsDrawer: {
+                  mainKey: 'category_id',
+                  title: '查看参数',
+                  type: 'drawer',
+                  size: '80%'
+                },
+                editParamCategoryDrawer: {
+                  mainKey: 'category_id',
+                  title: '编辑参数分类',
+                  type: 'drawer',
+                  size: '80%'
+                },
+                createParamDialog: {
+                  title: '新建参数',
+                  saveBtnText: '保存'
+                }
+              }
+            }
           }]
         },{
           key: 'product-brand',

@@ -17,5 +17,6 @@ module.exports = (app, router) => {
 
   // 参数库路由
   router.get('/api/proj/param-library/list', typeController.getParamLibraryList.bind(typeController));
+  router.post('/api/proj/param-library', typeController.createParam.bind(typeController));
 };
 

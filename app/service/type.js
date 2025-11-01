@@ -378,6 +378,59 @@ module.exports = (app) => {
         pageSize: parseInt(pageSize)
       };
     }
+
+    /**
+     * 创建参数（添加到参数库）
+     *
+     * @param {Object} params - 参数对象
+     * @param {string} params.param_name - 参数名称
+     * @param {string} params.param_type - 参数类型
+     * @param {string} params.param_category - 参数分类
+     * @param {string} [params.param_values] - 预定义值（JSON字符串）
+     * @param {number} [params.sort_order=0] - 排序
+     * @param {number} [params.status=1] - 状态
+     * @returns {Promise<string>} 返回参数ID
+     */
+    async createParam(params) {
+      const { v4: uuidv4 } = require('uuid');
+      const {
+        param_name,
+        param_type,
+        param_category,
+        param_values,
+        sort_order = 0,
+        status = 1
+      } = params;
+
+      // 检查同一分类下是否已存在相同名称的参数
+      const existing = await app.database('t_product_param_library')
+        .where('param_name', param_name)
+        .where('param_category', param_category)
+        .where('status', 1)
+        .first();
+
+      if (existing) {
+        throw new Error(`参数"${param_name}"在分类"${param_category}"中已存在`);
+      }
+
+      // 生成参数ID
+      const paramId = `PARAM_${uuidv4().replace(/-/g, '').substring(0, 16).toUpperCase()}`;
+
+      // 插入参数库
+      await app.database('t_product_param_library').insert({
+        param_id: paramId,
+        param_name,
+        param_type,
+        param_category,
+        param_values,
+        sort_order,
+        status,
+        create_time: new Date(),
+        update_time: new Date()
+      });
+
+      return paramId;
+    }
   };
 };
 
