@@ -17,9 +17,10 @@ module.exports = {
       query: {
         type: 'object',
         properties: {
-          brand_id: { type: 'string' }
-        },
-        required: ['brand_id']
+          brand_id: { type: 'string' },
+          value: { type: 'string' }  // remote-select 组件回显时使用 value 参数
+        }
+        // 不设置 required，允许 brand_id 或 value 任意一个
       }
     },
     post: {

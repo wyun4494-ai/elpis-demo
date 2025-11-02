@@ -318,5 +318,84 @@ module.exports = (app) => {
 
       this.success(ctx, { message: '更新成功' });
     }
+
+    /**
+     * 获取商品的所有参数值
+     */
+    async getProductParams(ctx) {
+      const { product_id: productId } = ctx.params;
+      const { business: businessService } = app.service;
+
+      const params = await businessService.getProductParams(productId);
+
+      this.success(ctx, params);
+    }
+
+    /**
+     * 批量上架商品
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {Array<string>} ctx.request.body.product_ids - 商品ID列表
+     * @returns {Promise<void>}
+     */
+    async batchShelfOn(ctx) {
+      const { product_ids: productIds } = ctx.request.body;
+      const { business: businessService } = app.service;
+
+      try {
+        const result = await businessService.batchShelfOn(productIds);
+        this.success(ctx, result);
+      } catch (error) {
+        app.logger.error('批量上架失败', error);
+        this.fail(ctx, error.message, 400);
+      }
+    }
+
+    /**
+     * 批量下架商品
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {Array<string>} ctx.request.body.product_ids - 商品ID列表
+     * @returns {Promise<void>}
+     */
+    async batchShelfOff(ctx) {
+      const { product_ids: productIds } = ctx.request.body;
+      const { business: businessService } = app.service;
+
+      try {
+        const result = await businessService.batchShelfOff(productIds);
+        this.success(ctx, result);
+      } catch (error) {
+        app.logger.error('批量下架失败', error);
+        this.fail(ctx, error.message, 400);
+      }
+    }
+
+    /**
+     * 批量删除商品
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {Array<string>} ctx.request.body.product_ids - 商品ID列表
+     * @param {string} [ctx.request.body.delete_reason] - 删除原因
+     * @returns {Promise<void>}
+     */
+    async batchDelete(ctx) {
+      const { product_ids: productIds, delete_reason: deleteReason } = ctx.request.body;
+      const { business: businessService } = app.service;
+
+      // 获取当前用户ID（从JWT Token中解析）
+      const userId = ctx.userId || 'system';
+
+      try {
+        const result = await businessService.batchDeleteProduct(productIds, deleteReason, userId);
+        this.success(ctx, result);
+      } catch (error) {
+        app.logger.error('批量删除失败', error);
+        this.fail(ctx, error.message, 400);
+      }
+    }
   };
 };

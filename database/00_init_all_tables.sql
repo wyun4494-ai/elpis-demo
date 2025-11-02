@@ -60,12 +60,11 @@ CREATE TABLE IF NOT EXISTS `t_product_brand` (
 CREATE TABLE IF NOT EXISTS `t_param_category` (
   `category_id` VARCHAR(64) NOT NULL PRIMARY KEY COMMENT '分类ID',
   `category_name` VARCHAR(50) NOT NULL COMMENT '分类名称',
-  `sort_order` INT DEFAULT 0 COMMENT '排序',
-  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `sort_order` INT DEFAULT 0 NOT NULL COMMENT '排序',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
 
-  UNIQUE KEY `uk_category_name` (`category_name`),
-  KEY `idx_sort` (`sort_order`)
+  UNIQUE KEY `uk_category_name` (`category_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='参数分类表';
 
 -- ================================================================
@@ -124,6 +123,7 @@ CREATE TABLE IF NOT EXISTS `t_product` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `product_id` VARCHAR(64) NOT NULL COMMENT '商品ID',
   `product_name` VARCHAR(200) NOT NULL COMMENT '商品名称',
+  `product_images` JSON COMMENT '商品图片（JSON数组）',
   `category_id` VARCHAR(64) DEFAULT NULL COMMENT '所属分类ID（末级）',
   `type_id` VARCHAR(64) DEFAULT NULL COMMENT '商品类型ID',
   `category_l1_id` VARCHAR(64) DEFAULT NULL COMMENT '一级分类ID',

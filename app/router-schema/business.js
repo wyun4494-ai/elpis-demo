@@ -116,6 +116,15 @@ module.exports = {
           shelf_status: {
             type: 'number',
           },
+          product_images: {
+            type: 'array',
+          },
+          skus: {
+            type: 'array',
+          },
+          params: {
+            type: 'object',
+          },
         },
         required: ['product_id'],
       }
@@ -220,5 +229,62 @@ module.exports = {
                 required: ['product_id'],
               }
             }
+          },
+          // 批量操作路由验证
+          '/api/proj/product/batch/shelf-on': {
+            post: {
+              body: {
+                type: 'object',
+                properties: {
+                  product_ids: {
+                    type: 'array',
+                    items: {
+                      type: 'string'
+                    }
+                  }
+                },
+                required: ['product_ids']
+              }
+            }
+          },
+          '/api/proj/product/batch/shelf-off': {
+            post: {
+              body: {
+                type: 'object',
+                properties: {
+                  product_ids: {
+                    type: 'array',
+                    items: {
+                      type: 'string'
+                    }
+                  }
+                },
+                required: ['product_ids']
+              }
+            }
+          },
+          '/api/proj/product/batch/delete': {
+            post: {
+              body: {
+                type: 'object',
+                properties: {
+                  product_ids: {
+                    type: 'array',
+                    items: {
+                      type: 'string'
+                    }
+                  },
+                  delete_reason: {
+                    type: 'string'
+                  }
+                },
+                required: ['product_ids']
+              }
+            }
           }
+
+  // 注意：带路径参数的 API（如 /api/proj/product/:product_id/skus）
+  // 不能在 router-schema 中定义，因为中间件使用 ctx.path（实际路径）进行匹配
+  // 实际路径（如 /api/proj/product/PROD000014/skus）无法匹配路由模式
+  // 这些 API 会跳过参数验证
 };

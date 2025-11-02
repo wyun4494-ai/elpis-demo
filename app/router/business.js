@@ -29,4 +29,12 @@ module.exports = (app, router) => {
   // SKU管理路由
   router.get('/api/proj/product/:product_id/skus', businessController.getProductSkus.bind(businessController));
   router.put('/api/proj/product/:product_id/skus', businessController.updateProductSkus.bind(businessController));
+
+  // 商品参数路由
+  router.get('/api/proj/product/:product_id/params', businessController.getProductParams.bind(businessController));
+
+  // 批量操作路由
+  router.post('/api/proj/product/batch/shelf-on', businessController.batchShelfOn.bind(businessController));
+  router.post('/api/proj/product/batch/shelf-off', businessController.batchShelfOff.bind(businessController));
+  router.post('/api/proj/product/batch/delete', businessController.batchDelete.bind(businessController));
 };

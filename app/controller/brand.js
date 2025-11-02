@@ -62,20 +62,40 @@ module.exports = (app) => {
      *
      * @param {Object} ctx - Koa 上下文对象
      * @param {Object} ctx.query - 查询参数
-     * @param {string} ctx.query.brand_id - 品牌ID
+     * @param {string} [ctx.query.brand_id] - 品牌ID
+     * @param {string} [ctx.query.value] - 品牌ID（remote-select 组件使用）
      * @returns {Promise<void>}
      */
     async getBrand(ctx) {
-      const { brand_id } = ctx.query;
+      // 支持 brand_id 或 value 参数（remote-select 组件回显时使用 value）
+      const { brand_id, value } = ctx.query;
+      const brandId = brand_id || value;
+
+      if (!brandId) {
+        this.fail(ctx, '缺少品牌ID参数');
+        return;
+      }
+
       const { brand: brandService } = app.service;
 
       try {
-        const brand = await brandService.getBrand(brand_id);
+        const brand = await brandService.getBrand(brandId);
         if (!brand) {
           this.fail(ctx, '品牌不存在', 404);
           return;
         }
-        this.success(ctx, brand);
+
+        // 转换为 remote-select 组件期望的格式
+        const result = {
+          label: brand.brand_name_en
+            ? `${brand.brand_name} (${brand.brand_name_en})`
+            : brand.brand_name,
+          value: brand.brand_id,
+          // 保留原始数据，以便需要时使用
+          ...brand
+        };
+
+        this.success(ctx, result);
       } catch (error) {
         this.fail(ctx, error.message, 500);
       }

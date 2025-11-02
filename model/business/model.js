@@ -280,6 +280,7 @@ module.exports = {
             required: ['product_name']
           },
           tableConfig: {
+            selectable: true, // 启用多选功能
             headerButtons: [{
               label: '添加商品',
               type: 'primary',
@@ -972,7 +973,7 @@ module.exports = {
                     type: 'string',
                     label: '分类ID',
                     tableOption: {
-                      width: 180,
+                      minWidth: 250,
                       'show-overflow-tooltip': true
                     },
                     editFormOption: {
@@ -984,7 +985,7 @@ module.exports = {
                     type: 'string',
                     label: '分类名称',
                     tableOption: {
-                      width: 200
+                      minWidth: 200
                     },
                     searchOption: {
                       comType: 'input',
@@ -1030,7 +1031,7 @@ module.exports = {
                     type: 'date',
                     label: '创建时间',
                     tableOption: {
-                      width: 180,
+                      minWidth: 180,
                       align: 'center'
                     }
                   },
@@ -1038,7 +1039,7 @@ module.exports = {
                     type: 'date',
                     label: '更新时间',
                     tableOption: {
-                      width: 180,
+                      minWidth: 180,
                       align: 'center'
                     }
                   }

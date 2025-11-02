@@ -326,22 +326,35 @@ module.exports = (app) => {
           product.category_name = '未分类';
         }
         
-        // 如果有品牌，获取品牌名称
+        // 确保所有字段都存在且为正确类型（避免前端验证错误）
+        // 处理 brand_id 和品牌名称
         if (product.brand_id) {
           const brand = await app.database('t_product_brand')
             .where('brand_id', product.brand_id)
             .where('status', 1)
             .first();
-          
+
           if (brand) {
-            product.brand_name = brand.brand_name_en 
+            product.brand_name = brand.brand_name_en
               ? `${brand.brand_name} (${brand.brand_name_en})`
               : brand.brand_name;
           } else {
             product.brand_name = product.brand_id;
           }
         } else {
+          // brand_id 为 NULL 或空时，设置为空字符串
+          product.brand_id = '';
           product.brand_name = '无品牌/其他';
+        }
+
+        // 确保 category_id 字段为字符串类型
+        if (!product.category_id) {
+          product.category_id = '';
+        }
+
+        // 确保 item_number 字段为字符串类型
+        if (!product.item_number) {
+          product.item_number = '';
         }
       }
 
@@ -358,12 +371,50 @@ module.exports = (app) => {
         .orderBy('sku_code', 'asc')
         .select('*');
 
-      // 计算每个SKU的库存状态
+      // 解析 SKU 属性 JSON
       skus.forEach(sku => {
+        // 计算库存状态
         sku.stock_status = this.calculateSkuStockStatus(sku.inventory, sku.stock_alert);
+
+        // 解析 sku_attributes JSON
+        if (sku.sku_attributes) {
+          try {
+            sku.attributes = typeof sku.sku_attributes === 'string'
+              ? JSON.parse(sku.sku_attributes)
+              : sku.sku_attributes;
+          } catch (error) {
+            console.error('Parse sku_attributes error:', error);
+            sku.attributes = {};
+          }
+        } else {
+          sku.attributes = {};
+        }
+
+        // 转换数字类型
+        sku.price = parseFloat(sku.price);
+        sku.promotion_price = sku.promotion_price ? parseFloat(sku.promotion_price) : null;
+        sku.inventory = parseInt(sku.inventory);
+        sku.stock_alert = parseInt(sku.stock_alert);
       });
 
       return skus;
+    }
+
+    /**
+     * 获取商品的所有参数值
+     */
+    async getProductParams(productId) {
+      const paramValues = await app.database('t_product_param_value')
+        .where('product_id', productId)
+        .select('*');
+
+      // 转换为对象格式 { param_id: param_value }
+      const params = {};
+      paramValues.forEach(item => {
+        params[item.param_id] = item.param_value;
+      });
+
+      return params;
     }
 
     /**
@@ -578,43 +629,116 @@ module.exports = (app) => {
      * 更新商品
      */
     async updateProduct(params) {
-      const { product_id: productId, product_name, category_id, brand_id, price, item_number, inventory, shelf_status, product_images } = params;
+      const {
+        product_id: productId,
+        product_name,
+        category_id,
+        brand_id,
+        price,
+        item_number,
+        inventory,
+        shelf_status,
+        product_images,
+        skus,
+        params: productParams
+      } = params;
 
-      // 构建更新对象，只更新传入的字段
-      const updateData = {
-        update_time: new Date()
-      };
+      // 使用事务处理商品和 SKU 的更新
+      await app.database.transaction(async (trx) => {
+        // 1. 构建商品更新对象，只更新传入的字段
+        const updateData = {
+          update_time: new Date()
+        };
 
-      if (product_name !== undefined) updateData.product_name = product_name;
-      if (product_images !== undefined) updateData.product_images = product_images ? JSON.stringify(product_images) : null;
-      if (brand_id !== undefined) updateData.brand_id = brand_id;
-      if (price !== undefined) updateData.price = price;
-      if (item_number !== undefined) updateData.item_number = item_number;
-      if (inventory !== undefined) updateData.inventory = inventory;
-      if (shelf_status !== undefined) updateData.shelf_status = shelf_status;
+        if (product_name !== undefined) updateData.product_name = product_name;
+        if (product_images !== undefined) updateData.product_images = product_images ? JSON.stringify(product_images) : null;
+        if (brand_id !== undefined) updateData.brand_id = brand_id;
+        if (price !== undefined) updateData.price = price;
+        if (item_number !== undefined) updateData.item_number = item_number;
+        if (inventory !== undefined) updateData.inventory = inventory;
+        if (shelf_status !== undefined) updateData.shelf_status = shelf_status;
 
-      // 如果修改了分类，需要更新各层级分类ID
-      if (category_id !== undefined) {
-        updateData.category_id = category_id;
+        // 如果修改了分类，需要更新各层级分类ID
+        if (category_id !== undefined) {
+          updateData.category_id = category_id;
 
-        if (category_id) {
-          const { category: categoryService } = app.service;
-          const categoryLevels = await categoryService.getCategoryLevels(category_id);
-          updateData.category_l1_id = categoryLevels.category_l1_id;
-          updateData.category_l2_id = categoryLevels.category_l2_id;
-          updateData.category_l3_id = categoryLevels.category_l3_id;
-          updateData.category_l4_id = categoryLevels.category_l4_id;
-        } else {
-          updateData.category_l1_id = null;
-          updateData.category_l2_id = null;
-          updateData.category_l3_id = null;
-          updateData.category_l4_id = null;
+          if (category_id) {
+            const { category: categoryService } = app.service;
+            const categoryLevels = await categoryService.getCategoryLevels(category_id);
+            updateData.category_l1_id = categoryLevels.category_l1_id;
+            updateData.category_l2_id = categoryLevels.category_l2_id;
+            updateData.category_l3_id = categoryLevels.category_l3_id;
+            updateData.category_l4_id = categoryLevels.category_l4_id;
+          } else {
+            updateData.category_l1_id = null;
+            updateData.category_l2_id = null;
+            updateData.category_l3_id = null;
+            updateData.category_l4_id = null;
+          }
         }
-      }
 
-      await app.database('t_product')
-        .where('product_id', productId)
-        .update(updateData);
+        // 更新商品基本信息
+        await trx('t_product')
+          .where('product_id', productId)
+          .update(updateData);
+
+        // 2. 处理 SKU 数据（如果传入了 skus 参数）
+        if (skus !== undefined && Array.isArray(skus)) {
+          // 删除旧的 SKU（软删除）
+          await trx('t_product_sku')
+            .where('product_id', productId)
+            .update({ status: 0, update_time: new Date() });
+
+          // 插入新的 SKU
+          if (skus.length > 0) {
+            for (const sku of skus) {
+              const skuId = `SKU${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+              await trx('t_product_sku').insert({
+                sku_id: skuId,
+                product_id: productId,
+                sku_name: sku.sku_name,
+                sku_code: sku.sku_code,
+                sku_attributes: JSON.stringify(sku.attributes),
+                price: sku.price || 0,
+                promotion_price: sku.promotion_price || null,
+                inventory: sku.inventory || 0,
+                stock_alert: sku.stock_alert || 50,
+                status: 1,
+                create_time: new Date(),
+                update_time: new Date()
+              });
+            }
+          }
+        }
+
+        // 3. 处理商品参数数据（如果传入了 params 参数）
+        if (productParams !== undefined && typeof productParams === 'object') {
+          // 删除旧的参数值
+          await trx('t_product_param_value')
+            .where('product_id', productId)
+            .delete();
+
+          // 插入新的参数值
+          const paramEntries = Object.entries(productParams);
+          if (paramEntries.length > 0) {
+            for (const [paramId, paramValue] of paramEntries) {
+              if (paramValue) {
+                // 生成参数值ID
+                const paramValueId = `PVAL${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+
+                await trx('t_product_param_value').insert({
+                  id: paramValueId,
+                  product_id: productId,
+                  param_id: paramId,
+                  param_value: paramValue,
+                  create_time: new Date()
+                });
+              }
+            }
+          }
+        }
+      });
 
       return true;
     }
@@ -782,6 +906,124 @@ module.exports = (app) => {
 
       // 注意：删除日志保留，用于历史审计
       return result > 0;
+    }
+
+    /**
+     * 批量上架商品
+     *
+     * @param {Array<string>} productIds - 商品ID列表
+     * @returns {Promise<Object>} 返回操作结果
+     */
+    async batchShelfOn(productIds) {
+      if (!productIds || productIds.length === 0) {
+        throw new Error('请选择要上架的商品');
+      }
+
+      // 1. 检查所有商品的库存是否为0
+      const products = await app.database('t_product')
+        .whereIn('product_id', productIds)
+        .where('status', 1)
+        .select('product_id', 'product_name', 'inventory');
+
+      const zeroInventoryProducts = products.filter(p => parseInt(p.inventory) === 0);
+
+      if (zeroInventoryProducts.length > 0) {
+        const productNames = zeroInventoryProducts.map(p => p.product_name).join('、');
+        throw new Error(`以下商品库存为0，无法上架：${productNames}`);
+      }
+
+      // 2. 批量更新上架状态
+      const result = await app.database('t_product')
+        .whereIn('product_id', productIds)
+        .where('status', 1)
+        .update({
+          shelf_status: 1,
+          update_time: new Date()
+        });
+
+      return {
+        success: true,
+        count: result,
+        message: `成功上架 ${result} 个商品`
+      };
+    }
+
+    /**
+     * 批量下架商品
+     *
+     * @param {Array<string>} productIds - 商品ID列表
+     * @returns {Promise<Object>} 返回操作结果
+     */
+    async batchShelfOff(productIds) {
+      if (!productIds || productIds.length === 0) {
+        throw new Error('请选择要下架的商品');
+      }
+
+      // 批量更新下架状态
+      const result = await app.database('t_product')
+        .whereIn('product_id', productIds)
+        .where('status', 1)
+        .update({
+          shelf_status: 0,
+          update_time: new Date()
+        });
+
+      return {
+        success: true,
+        count: result,
+        message: `成功下架 ${result} 个商品`
+      };
+    }
+
+    /**
+     * 批量删除商品（软删除）
+     *
+     * @param {Array<string>} productIds - 商品ID列表
+     * @param {string} deleteReason - 删除原因
+     * @param {string} userId - 操作用户ID
+     * @returns {Promise<Object>} 返回操作结果
+     */
+    async batchDeleteProduct(productIds, deleteReason, userId) {
+      if (!productIds || productIds.length === 0) {
+        throw new Error('请选择要删除的商品');
+      }
+
+      const deleteTime = new Date();
+
+      await app.database.transaction(async (trx) => {
+        // 1. 批量软删除商品
+        await trx('t_product')
+          .whereIn('product_id', productIds)
+          .where('status', 1)
+          .update({
+            status: 0,
+            delete_time: deleteTime,
+            delete_reason: deleteReason || '批量删除',
+            deleted_by: userId
+          });
+
+        // 2. 批量软删除关联的 SKU
+        await trx('t_product_sku')
+          .whereIn('product_id', productIds)
+          .update({ status: 0 });
+
+        // 3. 批量记录删除日志
+        const deleteLogs = productIds.map(productId => ({
+          product_id: productId,
+          operation_type: 1, // 1-删除
+          operation_time: deleteTime,
+          operation_by: userId,
+          delete_reason: deleteReason || '批量删除'
+        }));
+
+        await trx('t_product_delete_log').insert(deleteLogs);
+      });
+
+      return {
+        success: true,
+        count: productIds.length,
+        message: `成功删除 ${productIds.length} 个商品`
+      };
     }
 
     /**
