@@ -16,6 +16,8 @@ module.exports = (app) => {
      * @param {Object} ctx - Koa 上下文对象
      * @param {Object} ctx.query - 查询参数
      * @param {string} [ctx.query.category_name] - 分类名称（模糊查询）
+     * @param {string} [ctx.query.sort_field] - 排序字段（sort_order/create_time/update_time）
+     * @param {string} [ctx.query.sort_order] - 排序方向（asc/desc）
      * @param {number} [ctx.query.page=1] - 页码
      * @param {number} [ctx.query.pageSize=10] - 每页数量
      * @returns {Promise<void>}

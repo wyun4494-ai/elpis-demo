@@ -24,6 +24,10 @@ module.exports = (app) => {
      * @param {string} [ctx.query.product_name] - 商品名称（模糊查询）
      * @param {string} [ctx.query.sku_name] - SKU名称（模糊查询）
      * @param {number} [ctx.query.alert_level] - 预警级别（0-正常，1-警告，2-严重，3-缺货）
+     * @param {string} [ctx.query.start_time] - 创建时间开始（YYYY-MM-DD）
+     * @param {string} [ctx.query.end_time] - 创建时间结束（YYYY-MM-DD）
+     * @param {string} [ctx.query.sort_field] - 排序字段（create_time）
+     * @param {string} [ctx.query.sort_order] - 排序方向（asc/desc）
      * @param {number} [ctx.query.page=1] - 页码
      * @param {number} [ctx.query.pageSize=10] - 每页数量
      * @returns {Promise<void>}
@@ -152,6 +156,29 @@ module.exports = (app) => {
 
       this.success(ctx, {
         message: '补货成功',
+        ...result
+      });
+    }
+
+    /**
+     * 批量库存补货
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {Array<Object>} ctx.request.body.restock_list - 补货列表
+     * @param {string} ctx.request.body.restock_list[].sku_id - SKU ID
+     * @param {number} ctx.request.body.restock_list[].restock_quantity - 补货数量
+     * @param {string} [ctx.request.body.note] - 补货备注
+     * @returns {Promise<void>}
+     */
+    async batchRestock(ctx) {
+      const params = ctx.request.body;
+      const { stockAlert: stockAlertService } = app.service;
+
+      const result = await stockAlertService.batchRestock(params);
+
+      this.success(ctx, {
+        message: `批量补货完成：成功 ${result.success_count} 条，失败 ${result.fail_count} 条`,
         ...result
       });
     }

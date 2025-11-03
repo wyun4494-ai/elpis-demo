@@ -25,6 +25,8 @@ module.exports = (app) => {
      * @param {Object} params - 查询参数
      * @param {string} [params.brand_name] - 品牌名称（模糊查询，支持中英文）
      * @param {string} [params.first_letter] - 首字母筛选
+     * @param {string} [params.sort_field] - 排序字段（first_letter/sort_order/create_time）
+     * @param {string} [params.sort_order] - 排序方向（asc/desc）
      * @param {number} [params.page=1] - 页码
      * @param {number} [params.pageSize=10] - 每页数量
      * @returns {Promise<Object>} 返回品牌列表和分页信息
@@ -37,6 +39,8 @@ module.exports = (app) => {
       const {
         brand_name: brandName,
         first_letter: firstLetter,
+        sort_field: sortField,
+        sort_order: sortOrder,
         page = 1,
         pageSize = 10
       } = params;
@@ -64,10 +68,17 @@ module.exports = (app) => {
       const total = totalResult ? totalResult.count : 0;
 
       // 3. 查询列表数据
-      const list = await query
-        .select('*')
-        .orderBy('sort_order', 'asc')
-        .orderBy('brand_name', 'asc')
+      let listQuery = query.select('*');
+
+      // 动态排序
+      if (sortField && sortOrder) {
+        listQuery = listQuery.orderBy(sortField, sortOrder);
+      } else {
+        // 默认排序：先按排序字段，再按品牌名称
+        listQuery = listQuery.orderBy('sort_order', 'asc').orderBy('brand_name', 'asc');
+      }
+
+      const list = await listQuery
         .limit(parseInt(pageSize))
         .offset(offset);
 

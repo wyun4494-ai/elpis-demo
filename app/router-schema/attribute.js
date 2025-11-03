@@ -8,6 +8,8 @@ module.exports = {
           pageSize: { type: 'string' },
           attr_name: { type: 'string' },
           category_id: { type: 'string' },
+          sort_field: { type: 'string' },
+          sort_order: { type: 'string' }
         },
       }
     }

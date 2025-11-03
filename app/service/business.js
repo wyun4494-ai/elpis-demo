@@ -24,6 +24,8 @@ module.exports = (app) => {
      * @param {number} [params.shelf_status] - 上架状态（0-下架，1-上架）
      * @param {string} [params.create_time_start] - 创建时间开始
      * @param {string} [params.create_time_end] - 创建时间结束
+     * @param {string} [params.sort_field] - 排序字段
+     * @param {string} [params.sort_order] - 排序方向（asc/desc）
      * @param {number} [params.page=1] - 页码
      * @param {number} [params.pageSize=10] - 每页数量
      * @returns {Promise<Object>} 返回商品列表和分页信息
@@ -43,6 +45,8 @@ module.exports = (app) => {
         shelf_status: shelfStatus,
         create_time_start: createTimeStart,
         create_time_end: createTimeEnd,
+        sort_field: sortField,
+        sort_order: sortOrder,
         page = 1,
         pageSize = 10
       } = params;
@@ -113,18 +117,29 @@ module.exports = (app) => {
       const totalResult = await query.clone().count('* as count').first();
       const total = totalResult ? totalResult.count : 0;
 
-      // 11. 查询列表数据
+      // 11. 处理排序
+      // 允许排序的字段白名单（防止 SQL 注入）
+      const allowedSortFields = ['price', 'inventory', 'create_time', 'product_id'];
+      let orderByField = 'create_time';
+      let orderByDirection = 'desc';
+
+      if (sortField && allowedSortFields.includes(sortField)) {
+        orderByField = sortField;
+        orderByDirection = sortOrder === 'asc' ? 'asc' : 'desc';
+      }
+
+      // 12. 查询列表数据
       const list = await query
         .select('*')
-        .orderBy('create_time', 'desc')
+        .orderBy(orderByField, orderByDirection)
         .limit(parseInt(pageSize))
         .offset(offset);
 
-      // 12. 批量获取所有商品的SKU库存状态（优化性能，避免N+1查询）
+      // 13. 批量获取所有商品的SKU库存状态（优化性能，避免N+1查询）
       const productIds = list.map(item => item.product_id);
       const skuStatusMap = await this.getBatchProductStockStatus(productIds);
 
-      // 13. 格式化数据
+      // 14. 格式化数据
       list.forEach(item => {
         // 格式化时间
         item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
@@ -1023,6 +1038,144 @@ module.exports = (app) => {
         success: true,
         count: productIds.length,
         message: `成功删除 ${productIds.length} 个商品`
+      };
+    }
+
+    /**
+     * 批量恢复商品
+     * @param {Array<string>} productIds - 商品ID列表
+     * @param {string} note - 恢复备注
+     * @param {string} restoredBy - 恢复人
+     * @returns {Promise<Object>} 返回批量恢复结果
+     */
+    async batchRestoreProduct(productIds, note, restoredBy) {
+      if (!productIds || productIds.length === 0) {
+        throw new Error('商品ID列表不能为空');
+      }
+
+      const restoreTime = new Date();
+      let successCount = 0;
+      let failCount = 0;
+      const errors = [];
+
+      await app.database.transaction(async (trx) => {
+        for (const productId of productIds) {
+          try {
+            // 检查商品是否存在且已删除
+            const product = await trx('t_product')
+              .where('product_id', productId)
+              .where('status', 0)
+              .first();
+
+            if (!product) {
+              failCount++;
+              errors.push({ product_id: productId, reason: '商品不存在或未删除' });
+              continue;
+            }
+
+            // 1. 更新商品表：恢复为正常状态
+            await trx('t_product')
+              .where('product_id', productId)
+              .update({
+                status: 1,
+                delete_time: null,
+                delete_reason: null,
+                deleted_by: null,
+                update_time: restoreTime
+              });
+
+            // 2. 恢复关联的 SKU
+            await trx('t_product_sku')
+              .where('product_id', productId)
+              .update({ status: 1 });
+
+            // 3. 插入恢复日志
+            await trx('t_product_delete_log').insert({
+              product_id: productId,
+              operation_type: 2, // 2-恢复
+              operation_time: restoreTime,
+              operation_by: restoredBy,
+              delete_reason: note || '批量恢复'
+            });
+
+            successCount++;
+          } catch (error) {
+            failCount++;
+            errors.push({ product_id: productId, reason: error.message });
+          }
+        }
+      });
+
+      return {
+        success: true,
+        success_count: successCount,
+        fail_count: failCount,
+        errors: errors,
+        message: `批量恢复完成：成功 ${successCount} 条，失败 ${failCount} 条`
+      };
+    }
+
+    /**
+     * 批量永久删除商品（物理删除）
+     * @param {Array<string>} productIds - 商品ID列表
+     * @param {string} note - 删除备注
+     * @returns {Promise<Object>} 返回批量删除结果
+     */
+    async batchPermanentDeleteProduct(productIds, note) {
+      if (!productIds || productIds.length === 0) {
+        throw new Error('商品ID列表不能为空');
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+      const errors = [];
+
+      await app.database.transaction(async (trx) => {
+        for (const productId of productIds) {
+          try {
+            // 检查商品是否存在且已删除
+            const product = await trx('t_product')
+              .where('product_id', productId)
+              .where('status', 0)
+              .first();
+
+            if (!product) {
+              failCount++;
+              errors.push({ product_id: productId, reason: '商品不存在或未删除' });
+              continue;
+            }
+
+            // 1. 删除关联的 SKU
+            await trx('t_product_sku')
+              .where('product_id', productId)
+              .delete();
+
+            // 2. 删除商品参数值
+            await trx('t_product_param_value')
+              .where('product_id', productId)
+              .delete();
+
+            // 3. 删除商品
+            await trx('t_product')
+              .where('product_id', productId)
+              .delete();
+
+            // 注意：删除日志保留，用于历史审计
+
+            successCount++;
+          } catch (error) {
+            failCount++;
+            errors.push({ product_id: productId, reason: error.message });
+          }
+        }
+      });
+
+      return {
+        success: true,
+        success_count: successCount,
+        fail_count: failCount,
+        errors: errors,
+        message: `批量永久删除完成：成功 ${successCount} 条，失败 ${failCount} 条`
       };
     }
 

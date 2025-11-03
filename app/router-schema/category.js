@@ -9,7 +9,9 @@ module.exports = {
           category_name: { type: 'string' },
           parent_id: { type: 'string' },
           level: { type: 'string' },
-          status: { type: 'string' }
+          status: { type: 'string' },
+          sort_field: { type: 'string' },
+          sort_order: { type: 'string' }
         }
       }
     }

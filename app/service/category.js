@@ -7,15 +7,32 @@ module.exports = (app) => {
 
     /**
      * 获取分类列表（分页）
+     *
+     * @param {Object} params - 查询参数
+     * @param {string} [params.category_name] - 分类名称（模糊查询）
+     * @param {string} [params.parent_id] - 父级分类ID
+     * @param {number} [params.level] - 分类层级（1-4）
+     * @param {number} [params.status] - 状态（1-正常，0-已删除）
+     * @param {string} [params.sort_field] - 排序字段（level/sort_order/create_time）
+     * @param {string} [params.sort_order] - 排序方向（asc/desc）
+     * @param {number} [params.page=1] - 页码
+     * @param {number} [params.pageSize=10] - 每页数量
+     * @returns {Promise<Object>} 返回分类列表和分页信息
+     * @returns {Array} returns.list - 分类列表
+     * @returns {number} returns.total - 总数
+     * @returns {number} returns.page - 当前页码
+     * @returns {number} returns.pageSize - 每页数量
      */
     async getCategoryList(params) {
-      const { 
+      const {
         category_name: categoryName,
         parent_id: parentId,
         level,
         status,
-        page = 1, 
-        pageSize = 10 
+        sort_field: sortField,
+        sort_order: sortOrder,
+        page = 1,
+        pageSize = 10
       } = params;
 
       const offset = (parseInt(page) - 1) * parseInt(pageSize);
@@ -52,10 +69,17 @@ module.exports = (app) => {
       const total = totalResult ? totalResult.count : 0;
 
       // 查询列表数据
-      const list = await query
-        .select('*')
-        .orderBy('level', 'asc')
-        .orderBy('sort_order', 'asc')
+      let listQuery = query.select('*');
+
+      // 动态排序
+      if (sortField && sortOrder) {
+        listQuery = listQuery.orderBy(sortField, sortOrder);
+      } else {
+        // 默认排序：先按层级，再按排序字段
+        listQuery = listQuery.orderBy('level', 'asc').orderBy('sort_order', 'asc');
+      }
+
+      const list = await listQuery
         .limit(parseInt(pageSize))
         .offset(offset);
 

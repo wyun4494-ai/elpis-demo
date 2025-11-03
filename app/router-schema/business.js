@@ -37,6 +37,12 @@ module.exports = {
           create_time_end: {
             type: 'string',
           },
+          sort_field: {
+            type: 'string',
+          },
+          sort_order: {
+            type: 'string',
+          },
         },
       }
     }
@@ -275,6 +281,44 @@ module.exports = {
                     }
                   },
                   delete_reason: {
+                    type: 'string'
+                  }
+                },
+                required: ['product_ids']
+              }
+            }
+          },
+          '/api/proj/product/batch-restore': {
+            post: {
+              body: {
+                type: 'object',
+                properties: {
+                  product_ids: {
+                    type: 'array',
+                    items: {
+                      type: 'string'
+                    }
+                  },
+                  note: {
+                    type: 'string'
+                  }
+                },
+                required: ['product_ids']
+              }
+            }
+          },
+          '/api/proj/product/batch-permanent-delete': {
+            post: {
+              body: {
+                type: 'object',
+                properties: {
+                  product_ids: {
+                    type: 'array',
+                    items: {
+                      type: 'string'
+                    }
+                  },
+                  note: {
                     type: 'string'
                   }
                 },

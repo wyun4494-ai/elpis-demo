@@ -19,6 +19,8 @@ module.exports = (app) => {
      * @param {string} [ctx.query.parent_id] - 父级分类ID
      * @param {number} [ctx.query.level] - 分类层级（1-4）
      * @param {number} [ctx.query.status] - 状态（1-正常，0-已删除）
+     * @param {string} [ctx.query.sort_field] - 排序字段（level/sort_order/create_time）
+     * @param {string} [ctx.query.sort_order] - 排序方向（asc/desc）
      * @param {number} [ctx.query.page=1] - 页码
      * @param {number} [ctx.query.pageSize=10] - 每页数量
      * @returns {Promise<void>}

@@ -17,6 +17,8 @@ module.exports = (app) => {
      * @param {Object} ctx.query - 查询参数
      * @param {string} [ctx.query.brand_name] - 品牌名称（模糊查询，支持中英文）
      * @param {string} [ctx.query.first_letter] - 首字母筛选
+     * @param {string} [ctx.query.sort_field] - 排序字段（first_letter/sort_order/create_time）
+     * @param {string} [ctx.query.sort_order] - 排序方向（asc/desc）
      * @param {number} [ctx.query.page=1] - 页码
      * @param {number} [ctx.query.pageSize=10] - 每页数量
      * @returns {Promise<void>}

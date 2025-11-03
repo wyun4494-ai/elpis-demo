@@ -10,6 +10,10 @@ module.exports = {
           category_id: { type: 'string' },
           alert_level: { type: 'string' },
           is_handled: { type: 'string' },
+          start_time: { type: 'string' },
+          end_time: { type: 'string' },
+          sort_field: { type: 'string' },
+          sort_order: { type: 'string' }
         },
       }
     }
@@ -70,5 +74,27 @@ module.exports = {
       }
     }
   },
+  '/api/proj/stock-alert/batch-restock': {
+    post: {
+      body: {
+        type: 'object',
+        properties: {
+          restock_list: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                sku_id: { type: 'string' },
+                restock_quantity: { type: 'number' }
+              },
+              required: ['sku_id', 'restock_quantity']
+            }
+          },
+          note: { type: 'string' }
+        },
+        required: ['restock_list']
+      }
+    }
+  }
 };
 

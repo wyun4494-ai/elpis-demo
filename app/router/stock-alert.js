@@ -8,5 +8,6 @@ module.exports = (app, router) => {
   router.post('/api/proj/stock-alert/batch-handle', stockAlertController.batchHandleAlert.bind(stockAlertController));
   router.get('/api/proj/stock-alert/statistics', stockAlertController.getStatistics.bind(stockAlertController));
   router.post('/api/proj/stock-alert/restock', stockAlertController.restock.bind(stockAlertController));
+  router.post('/api/proj/stock-alert/batch-restock', stockAlertController.batchRestock.bind(stockAlertController));
 };
 

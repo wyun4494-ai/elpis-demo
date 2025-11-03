@@ -2,8 +2,7 @@
 module.exports = {
   model: 'dashboard',
   name: '电商系统',
-  menu: [
-    {
+  menu: [{
     key: 'product',
     name: '商品管理',
     menuType: 'module',
@@ -160,7 +159,8 @@ module.exports = {
                 label: '价格',
                 tableOption: {
                   width: 180,
-                  comType: 'priceItemNumber'
+                  comType: 'priceItemNumber',
+                  sortable: 'custom'  // 启用后端排序
                 },
                 searchOption: {
                   label: '价格',
@@ -204,6 +204,7 @@ module.exports = {
                 label: '总库存',
                 tableOption: {
                   width: 100,
+                  sortable: 'custom'  // 启用后端排序
                 },
                 searchOption: {
                   comType: 'input',
@@ -421,7 +422,8 @@ module.exports = {
                   type: 'number',
                   label: '层级',
                   tableOption: {
-                    width: 80
+                    width: 80,
+                    sortable: 'custom'  // 启用后端排序
                   },
                   searchOption: {
                     comType: 'select',
@@ -440,7 +442,8 @@ module.exports = {
                   type: 'number',
                   label: '排序',
                   tableOption: {
-                    width: 80
+                    width: 80,
+                    sortable: 'custom'  // 启用后端排序
                   },
                   createFormOption: {
                     comType: 'input-number',
@@ -464,7 +467,8 @@ module.exports = {
                   type: 'date',
                   label: '创建时间',
                   tableOption: {
-                    width: 180
+                    width: 180,
+                    sortable: 'custom'  // 启用后端排序
                   },
                   detailPanelOption: {}
                 }
@@ -752,7 +756,8 @@ module.exports = {
                     type: 'number',
                     label: '排序',
                     tableOption: {
-                      width: 80
+                      width: 80,
+                      sortable: 'custom'  // 启用后端排序
                     },
                     createFormOption: {
                       comType: 'input-number',
@@ -906,7 +911,8 @@ module.exports = {
                     type: 'number',
                     label: '排序',
                     tableOption: {
-                      width: 80
+                      width: 80,
+                      sortable: 'custom'  // 启用后端排序
                     },
                     editFormOption: {
                       comType: 'input-number',
@@ -1015,7 +1021,8 @@ module.exports = {
                     label: '排序',
                     tableOption: {
                       width: 100,
-                      align: 'center'
+                      align: 'center',
+                      sortable: 'custom'  // 启用后端排序
                     },
                     createFormOption: {
                       comType: 'input-number',
@@ -1032,7 +1039,8 @@ module.exports = {
                     label: '创建时间',
                     tableOption: {
                       minWidth: 180,
-                      align: 'center'
+                      align: 'center',
+                      sortable: 'custom'  // 启用后端排序
                     }
                   },
                   update_time: {
@@ -1040,7 +1048,8 @@ module.exports = {
                     label: '更新时间',
                     tableOption: {
                       minWidth: 180,
-                      align: 'center'
+                      align: 'center',
+                      sortable: 'custom'  // 启用后端排序
                     }
                   }
                 },
@@ -1175,7 +1184,8 @@ module.exports = {
                   type: 'string',
                   label: '首字母',
                   tableOption: {
-                    width: 90
+                    width: 90,
+                    sortable: 'custom'  // 启用后端排序
                   },
                   searchOption: {
                     comType: 'select',
@@ -1259,7 +1269,8 @@ module.exports = {
                   type: 'number',
                   label: '排序',
                   tableOption: {
-                    width: 80
+                    width: 80,
+                    sortable: 'custom'  // 启用后端排序
                   },
                   createFormOption: {
                     comType: 'input-number',
@@ -1276,7 +1287,8 @@ module.exports = {
                   type: 'date',
                   label: '创建时间',
                   tableOption: {
-                    width: 180
+                    width: 180,
+                    sortable: 'custom'  // 启用后端排序
                   },
                   detailPanelOption: {}
                 }
@@ -1326,223 +1338,268 @@ module.exports = {
               }
             }
           }
-        },{
-          key: 'stock-alert',
-          name: '库存预警',
-          menuType: 'module',
-          moduleType: 'schema',
-          schemaConfig: {
-            api: '/api/proj/stock-alert',
-            schema: {
-              type: 'object',
-              properties: {
-                product_name: {
-                  type: 'string',
-                  label: '商品名称',
-                  tableOption: {},
-                  searchOption: {
-                    comType: 'input',
-                    placeholder: '请输入商品名称'
-                  }
-                },
-                sku_name: {
-                  type: 'string',
-                  label: 'SKU',
-                  tableOption: {
-                    width: 200
-                  }
-                },
-                inventory: {
-                  type: 'number',
-                  label: '当前库存',
-                  tableOption: {
-                    width: 100
-                  }
-                },
-                stock_alert: {
-                  type: 'number',
-                  label: '预警值',
-                  tableOption: {
-                    width: 100
-                  }
-                },
-                alert_label: {
-                  type: 'string',
-                  label: '预警级别',
-                  tableOption: {
-                    width: 120
-                  },
-                  searchOption: {
-                    label: '预警级别',
-                    comType: 'select',
-                    enumList: [{
-                      label: '全部',
-                      value: -999
-                    }, {
-                      label: '缺货',
-                      value: 3
-                    }, {
-                      label: '严重',
-                      value: 2
-                    }, {
-                      label: '警告',
-                      value: 1
-                    }]
-                  }
-                },
-                create_time: {
-                  type: 'date',
-                  label: '创建时间',
-                  tableOption: {
-                    width: 180
-                  }
-                }
-              }
-            },
-            tableConfig: {
-              rowButtons: [{
-                label: '补货',
-                type: 'primary',
-                eventKey: 'showComponent',
-                eventOption: {
-                  comName: 'restockDialog'
-                }
-              }]
-            },
-            componentConfig: {
-              restockDialog: {
-                title: '库存补货',
-                saveBtnText: '确认补货'
-              }
-            }
-          }
-        }]
-      },{
-        key: 'product-recycle',
-        name: '商品回收站',
-        menuType: 'module',
-        moduleType: 'schema',
-        schemaConfig: {
-          api: '/api/proj/product/recycle',
-          schema: {
-            type: 'object',
-            properties: {
-              product_id: {
-                type: 'string',
-                label: '商品编号',
-                tableOption: {
-                  width: 200,
-                  'show-overflow-tooltip': true,
-                  sortable: true
-                },
-                detailPanelOption: {}
-              },
-              product_name: {
-                type: 'string',
-                label: '商品名称',
-                tableOption: {
-                  width: 200,
-                },
-                searchOption: {
-                  comType: 'input',
-                  placeholder: '请输入商品名称'
-                },
-                detailPanelOption: {}
-              },
-              price: {
-                type: 'number', 
-                label: '价格',
-                tableOption: {
-                  width: 150,
-                  toFixed: 2
-                },
-                detailPanelOption: {}
-              },
-              inventory: {
-                type: 'number',
-                label: '库存',
-                tableOption: {
-                  width: 150,
-                },
-                detailPanelOption: {}
-              },
-              create_time: {
-                type: 'date',
-                label: '创建时间',
-                tableOption: {
-                  width: 180
-                },
-                detailPanelOption: {}
-              },
-              delete_time: {
-                type: 'date',
-                label: '删除时间',
-                tableOption: {
-                  width: 180
-                },
-                searchOption: {
-                  comType: 'dateRange'
-                },
-                detailPanelOption: {}
-              },
-              delete_reason: {
-                type: 'string',
-                label: '删除原因',
-                tableOption: {
-                  width: 200,
-                  'show-overflow-tooltip': true
-                },
-                detailPanelOption: {}
-              },
-              deleted_by: {
-                type: 'string',
-                label: '删除人',
-                tableOption: {
-                  width: 120
-                },
-                detailPanelOption: {}
-              }
-            }
-          },
-          tableConfig: {
-            headerButtons: [],
-            rowButtons: [{
-              label: '查看',
-              type: 'primary',
-              eventKey: 'showComponent',
-              eventOption: {
-                comName: 'detailPanel'
-              }
-            }, {
-              label: '恢复',
-              type: 'success',
-              eventKey: 'restore',
-              eventOption: {
-                params: {
-                  product_id: 'schema::product_id'
-                }
-              }
-            }, {
-              label: '永久删除',
-              type: 'danger',
-              eventKey: 'permanentDelete',
-              eventOption: {
-                params: {
-                  product_id: 'schema::product_id'
-                }
-              }
-            }]
-          },
-          componentConfig: {
-            detailPanel: {
-              mainKey: 'product_id',
-              title: '查看删除商品详情'
-            }
-          }
         }
-      }]
-    }
-  }, {
+      ]
+    },{
+      key: 'stock-alert',
+      name: '库存预警',
+      menuType: 'module',
+      moduleType: 'schema',
+      schemaConfig: {
+        api: '/api/proj/stock-alert',
+        schema: {
+          type: 'object',
+          properties: {
+            product_name: {
+              type: 'string',
+              label: '商品名称',
+              tableOption: {},
+              searchOption: {
+                comType: 'input',
+                placeholder: '请输入商品名称'
+              }
+            },
+            sku_name: {
+              type: 'string',
+              label: 'SKU',
+              tableOption: {
+                width: 200
+              }
+            },
+            inventory: {
+              type: 'number',
+              label: '当前库存',
+              tableOption: {
+                width: 100
+              }
+            },
+            stock_alert: {
+              type: 'number',
+              label: '预警值',
+              tableOption: {
+                width: 100
+              }
+            },
+            alert_label: {
+              type: 'string',
+              label: '预警级别',
+              tableOption: {
+                width: 120
+              },
+              searchOption: {
+                label: '预警级别',
+                comType: 'select',
+                enumList: [{
+                  label: '全部',
+                  value: -999
+                }, {
+                  label: '缺货',
+                  value: 3
+                }, {
+                  label: '严重',
+                  value: 2
+                }, {
+                  label: '警告',
+                  value: 1
+                }]
+              }
+            },
+            create_time: {
+              type: 'date',
+              label: '创建时间',
+              tableOption: {
+                width: 180,
+                sortable: 'custom'  // 启用后端排序
+              },
+              searchOption: {
+                comType: 'dateRange',  // ✅ 修复：使用正确的组件类型名称
+                placeholder: '请选择创建时间范围'
+              }
+            }
+          }
+        },
+        tableConfig: {
+          selectable: true,  // ✅ 启用多选功能
+          rowButtons: [{
+            label: '补货',
+            type: 'primary',
+            eventKey: 'showComponent',
+            eventOption: {
+              comName: 'restockDialog'
+            }
+          }],
+          batchButtons: [{
+            label: '批量补货',
+            value: 'batchRestock',  // ✅ 批量操作的唯一标识
+            type: 'primary',
+            eventKey: 'batchRestock'  // ✅ 触发的事件名
+          }]
+        },
+        componentConfig: {
+          restockDialog: {
+            title: '库存补货',
+            saveBtnText: '确认补货'
+          },
+          batchRestockDialog: {
+            title: '批量库存补货',
+            saveBtnText: '确认补货'
+          }
+        },
+        components: {
+          batchRestockDialog: {}
+        }
+      }
+    },{
+      key: 'product-recycle',
+      name: '商品回收站',
+      menuType: 'module',
+      moduleType: 'schema',
+      schemaConfig: {
+        api: '/api/proj/product/recycle',
+        schema: {
+          type: 'object',
+          properties: {
+            product_id: {
+              type: 'string',
+              label: '商品编号',
+              tableOption: {
+                width: 200,
+                'show-overflow-tooltip': true,
+                sortable: true
+              },
+              detailPanelOption: {}
+            },
+            product_name: {
+              type: 'string',
+              label: '商品名称',
+              tableOption: {
+                width: 200,
+              },
+              searchOption: {
+                comType: 'input',
+                placeholder: '请输入商品名称'
+              },
+              detailPanelOption: {}
+            },
+            price: {
+              type: 'number',
+              label: '价格',
+              tableOption: {
+                width: 150,
+                toFixed: 2
+              },
+              detailPanelOption: {}
+            },
+            inventory: {
+              type: 'number',
+              label: '库存',
+              tableOption: {
+                width: 150,
+              },
+              detailPanelOption: {}
+            },
+            create_time: {
+              type: 'date',
+              label: '创建时间',
+              tableOption: {
+                width: 180,
+                sortable: 'custom'  // ✅ 启用后端排序
+              },
+              detailPanelOption: {}
+            },
+            delete_time: {
+              type: 'date',
+              label: '删除时间',
+              tableOption: {
+                width: 180,
+                sortable: 'custom'  // ✅ 启用后端排序
+              },
+              searchOption: {
+                comType: 'dateRange',
+                placeholder: '请选择删除时间范围'
+              },
+              detailPanelOption: {}
+            },
+            delete_reason: {
+              type: 'string',
+              label: '删除原因',
+              tableOption: {
+                width: 200,
+                'show-overflow-tooltip': true
+              },
+              detailPanelOption: {}
+            },
+            deleted_by: {
+              type: 'string',
+              label: '删除人',
+              tableOption: {
+                width: 120
+              },
+              detailPanelOption: {}
+            }
+          }
+        },
+        tableConfig: {
+          selectable: true,  // ✅ 启用多选功能
+          headerButtons: [],
+          rowButtons: [{
+            label: '查看',
+            type: 'primary',
+            eventKey: 'showComponent',
+            eventOption: {
+              comName: 'detailPanel'
+            }
+          }, {
+            label: '恢复',
+            type: 'success',
+            eventKey: 'restore',
+            eventOption: {
+              params: {
+                product_id: 'schema::product_id'
+              }
+            }
+          }, {
+            label: '永久删除',
+            type: 'danger',
+            eventKey: 'permanentDelete',
+            eventOption: {
+              params: {
+                product_id: 'schema::product_id'
+              }
+            }
+          }],
+          batchButtons: [{
+            label: '批量恢复',
+            value: 'batchRestore',
+            type: 'success',
+            eventKey: 'batchRestore'
+          }, {
+            label: '批量永久删除',
+            value: 'batchPermanentDelete',
+            type: 'danger',
+            eventKey: 'batchPermanentDelete'
+          }]
+        },
+        componentConfig: {
+          detailPanel: {
+            mainKey: 'product_id',
+            title: '查看删除商品详情'
+          },
+          batchRestoreDialog: {
+            title: '批量恢复商品'
+          },
+          batchPermanentDeleteDialog: {
+            title: '批量永久删除商品'
+          }
+        },
+        components: {
+          batchRestoreDialog: {},
+          batchPermanentDeleteDialog: {}
+        }
+      }
+    }]
+  }
+},{
     key: 'client',
     name: '客户管理',
     menuType: 'module',
@@ -1558,5 +1615,5 @@ module.exports = {
     customConfig: {
       path: '/todo'
     }
-  },]
+  }]
 }

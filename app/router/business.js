@@ -37,4 +37,6 @@ module.exports = (app, router) => {
   router.post('/api/proj/product/batch/shelf-on', businessController.batchShelfOn.bind(businessController));
   router.post('/api/proj/product/batch/shelf-off', businessController.batchShelfOff.bind(businessController));
   router.post('/api/proj/product/batch/delete', businessController.batchDelete.bind(businessController));
+  router.post('/api/proj/product/batch-restore', businessController.batchRestore.bind(businessController));
+  router.post('/api/proj/product/batch-permanent-delete', businessController.batchPermanentDelete.bind(businessController));
 };

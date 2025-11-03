@@ -6,7 +6,9 @@ module.exports = {
         properties: {
           page: { type: 'string' },
           pageSize: { type: 'string' },
-          category_name: { type: 'string' }
+          category_name: { type: 'string' },
+          sort_field: { type: 'string' },
+          sort_order: { type: 'string' }
         }
       }
     }

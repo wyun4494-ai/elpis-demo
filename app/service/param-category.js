@@ -23,6 +23,8 @@ module.exports = (app) => {
      *
      * @param {Object} params - 查询参数
      * @param {string} [params.category_name] - 分类名称（模糊查询）
+     * @param {string} [params.sort_field] - 排序字段（sort_order/create_time/update_time）
+     * @param {string} [params.sort_order] - 排序方向（asc/desc）
      * @param {number} [params.page=1] - 页码
      * @param {number} [params.pageSize=10] - 每页数量
      * @returns {Promise<Object>} 返回参数分类列表和分页信息
@@ -34,6 +36,8 @@ module.exports = (app) => {
     async getParamCategoryList(params) {
       const {
         category_name: categoryName,
+        sort_field: sortField,
+        sort_order: sortOrder,
         page = 1,
         pageSize = 10
       } = params;
@@ -53,10 +57,17 @@ module.exports = (app) => {
       const total = totalResult ? totalResult.count : 0;
 
       // 3. 查询列表数据
-      const list = await query
-        .select('*')
-        .orderBy('sort_order', 'asc')
-        .orderBy('create_time', 'desc')
+      let listQuery = query.select('*');
+
+      // 动态排序
+      if (sortField && sortOrder) {
+        listQuery = listQuery.orderBy(sortField, sortOrder);
+      } else {
+        // 默认排序：先按排序字段，再按创建时间倒序
+        listQuery = listQuery.orderBy('sort_order', 'asc').orderBy('create_time', 'desc');
+      }
+
+      const list = await listQuery
         .limit(parseInt(pageSize))
         .offset(offset);
 

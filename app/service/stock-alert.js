@@ -25,14 +25,18 @@ module.exports = (app) => {
      * 1. 查询所有 SKU（关联商品表）
      * 2. 计算每个 SKU 的预警级别
      * 3. 过滤掉正常库存的 SKU（level=0）
-     * 4. 根据筛选条件过滤
-     * 5. 内存分页返回结果
+     * 4. 根据筛选条件过滤（商品名称、预警级别、创建时间范围）
+     * 5. 排序（支持动态排序）
+     * 6. 内存分页返回结果
      *
      * @param {Object} params - 查询参数
      * @param {string} [params.product_name] - 商品名称（模糊查询）
      * @param {string} [params.category_id] - 分类ID
      * @param {number} [params.alert_level] - 预警级别（1-警告，2-严重，3-缺货）
-     * @param {number} [params.is_handled] - 是否已处理（0-未处理，1-已处理）
+     * @param {string} [params.start_time] - 创建时间开始（YYYY-MM-DD）
+     * @param {string} [params.end_time] - 创建时间结束（YYYY-MM-DD）
+     * @param {string} [params.sort_field] - 排序字段（create_time）
+     * @param {string} [params.sort_order] - 排序方向（asc/desc）
      * @param {number} [params.page=1] - 页码
      * @param {number} [params.pageSize=50] - 每页数量
      * @returns {Promise<Object>} 返回预警列表和分页信息
@@ -46,7 +50,10 @@ module.exports = (app) => {
         product_name: productName,
         category_id: categoryId,
         alert_level: alertLevel,
-        is_handled: isHandled,
+        start_time: startTime,
+        end_time: endTime,
+        sort_field: sortField,
+        sort_order: sortOrder,
         page = 1,
         pageSize = 50
       } = params;
@@ -69,6 +76,15 @@ module.exports = (app) => {
         query = query.where('p.category_id', categoryId);
       }
 
+      // 创建时间范围筛选
+      if (startTime) {
+        query = query.where('sku.create_time', '>=', `${startTime} 00:00:00`);
+      }
+
+      if (endTime) {
+        query = query.where('sku.create_time', '<=', `${endTime} 23:59:59`);
+      }
+
       // 查询所有 SKU
       const allSkus = await query
         .select(
@@ -79,8 +95,7 @@ module.exports = (app) => {
           'sku.stock_alert',
           'p.product_name',
           'sku.create_time'
-        )
-        .orderBy('sku.inventory', 'asc');
+        );
 
       // 2. 计算每个 SKU 的预警级别并过滤
       const alertList = [];
@@ -111,7 +126,24 @@ module.exports = (app) => {
         });
       }
 
-      // 3. 内存分页
+      // 3. 排序（内存排序）
+      if (sortField && sortOrder) {
+        alertList.sort((a, b) => {
+          const aValue = a[sortField];
+          const bValue = b[sortField];
+
+          if (sortOrder === 'asc') {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        });
+      } else {
+        // 默认排序：按库存升序（最紧急的在前面）
+        alertList.sort((a, b) => a.inventory - b.inventory);
+      }
+
+      // 4. 内存分页
       const total = alertList.length;
       const list = alertList.slice(offset, offset + parseInt(pageSize));
 
@@ -448,6 +480,110 @@ module.exports = (app) => {
         new_inventory: newInventory,
         product_total_inventory: totalInventory
       };
+    }
+
+    /**
+     * 批量库存补货
+     *
+     * 业务流程：
+     * 1. 验证参数（SKU ID 列表、补货数量）
+     * 2. 使用事务批量更新 SKU 库存
+     * 3. 同步更新每个商品的总库存
+     *
+     * @param {Object} params - 批量补货参数
+     * @param {Array<Object>} params.restock_list - 补货列表
+     * @param {string} params.restock_list[].sku_id - SKU ID
+     * @param {number} params.restock_list[].restock_quantity - 补货数量
+     * @param {string} [params.note] - 补货备注
+     * @returns {Promise<Object>} 返回批量补货结果
+     * @returns {number} returns.success_count - 成功数量
+     * @returns {number} returns.fail_count - 失败数量
+     * @returns {Array} returns.details - 详细结果列表
+     * @throws {Error} 如果参数无效，抛出异常
+     */
+    async batchRestock(params) {
+      const { restock_list: restockList, note = '' } = params;
+
+      // 1. 验证参数
+      if (!restockList || !Array.isArray(restockList) || restockList.length === 0) {
+        throw new Error('补货列表不能为空');
+      }
+
+      const results = {
+        success_count: 0,
+        fail_count: 0,
+        details: []
+      };
+
+      // 2. 使用事务批量处理
+      await app.database.transaction(async (trx) => {
+        for (const item of restockList) {
+          const { sku_id: skuId, restock_quantity: quantity } = item;
+
+          try {
+            // 验证参数
+            if (!skuId) {
+              throw new Error('SKU ID不能为空');
+            }
+
+            if (!quantity || quantity <= 0) {
+              throw new Error('补货数量必须大于0');
+            }
+
+            // 获取当前SKU信息
+            const sku = await trx('t_product_sku')
+              .where('sku_id', skuId)
+              .first();
+
+            if (!sku) {
+              throw new Error('SKU不存在');
+            }
+
+            // 更新SKU库存（原库存 + 补货数量）
+            const newInventory = parseInt(sku.inventory) + parseInt(quantity);
+
+            await trx('t_product_sku')
+              .where('sku_id', skuId)
+              .update({
+                inventory: newInventory,
+                update_time: new Date()
+              });
+
+            // 同步更新商品总库存（所有SKU库存之和）
+            const allSkus = await trx('t_product_sku')
+              .where('product_id', sku.product_id)
+              .where('status', 1)
+              .select('inventory');
+
+            const totalInventory = allSkus.reduce((sum, s) => sum + parseInt(s.inventory), 0);
+
+            await trx('t_product')
+              .where('product_id', sku.product_id)
+              .update({
+                inventory: totalInventory,
+                update_time: new Date()
+              });
+
+            results.success_count++;
+            results.details.push({
+              sku_id: skuId,
+              success: true,
+              old_inventory: sku.inventory,
+              restock_quantity: quantity,
+              new_inventory: newInventory
+            });
+          } catch (error) {
+            results.fail_count++;
+            results.details.push({
+              sku_id: skuId,
+              success: false,
+              error: error.message
+            });
+          }
+        }
+      });
+
+      return results;
     }
   };
 };

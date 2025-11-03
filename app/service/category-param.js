@@ -23,6 +23,8 @@ module.exports = (app) => {
      * @param {Object} params - 查询参数
      * @param {string} [params.param_name] - 参数名称（模糊查询）
      * @param {string} [params.category_id] - 分类ID
+     * @param {string} [params.sort_field] - 排序字段（sort_order）
+     * @param {string} [params.sort_order] - 排序方向（asc/desc）
      * @param {number} [params.page=1] - 页码
      * @param {number} [params.pageSize=50] - 每页数量
      * @returns {Promise<Object>} 返回参数关联列表和分页信息
@@ -35,6 +37,8 @@ module.exports = (app) => {
       const {
         param_name: paramName,
         category_id: categoryId,
+        sort_field: sortField,
+        sort_order: sortOrder,
         page = 1,
         pageSize = 50
       } = params;
@@ -76,9 +80,16 @@ module.exports = (app) => {
         listQuery = listQuery.where('cp.category_id', categoryId);
       }
 
+      // 动态排序
+      if (sortField && sortOrder) {
+        // 注意：排序字段需要加表别名前缀
+        listQuery = listQuery.orderBy(`cp.${sortField}`, sortOrder);
+      } else {
+        // 默认排序：先按分类，再按排序字段
+        listQuery = listQuery.orderBy('cp.category_id', 'asc').orderBy('cp.sort_order', 'asc');
+      }
+
       const list = await listQuery
-        .orderBy('cp.category_id', 'asc')
-        .orderBy('cp.sort_order', 'asc')
         .limit(parseInt(pageSize))
         .offset(offset);
 

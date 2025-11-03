@@ -397,5 +397,52 @@ module.exports = (app) => {
         this.fail(ctx, error.message, 400);
       }
     }
+
+    /**
+     * 批量恢复商品
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {Array<string>} ctx.request.body.product_ids - 商品ID列表
+     * @param {string} [ctx.request.body.note] - 恢复备注
+     * @returns {Promise<void>}
+     */
+    async batchRestore(ctx) {
+      const { product_ids: productIds, note } = ctx.request.body;
+      const { business: businessService } = app.service;
+
+      // 获取当前用户ID（从JWT Token中解析）
+      const userId = ctx.userId || 'system';
+
+      try {
+        const result = await businessService.batchRestoreProduct(productIds, note, userId);
+        this.success(ctx, result);
+      } catch (error) {
+        app.logger.error('批量恢复失败', error);
+        this.fail(ctx, error.message, 400);
+      }
+    }
+
+    /**
+     * 批量永久删除商品
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {Array<string>} ctx.request.body.product_ids - 商品ID列表
+     * @param {string} [ctx.request.body.note] - 删除备注
+     * @returns {Promise<void>}
+     */
+    async batchPermanentDelete(ctx) {
+      const { product_ids: productIds, note } = ctx.request.body;
+      const { business: businessService } = app.service;
+
+      try {
+        const result = await businessService.batchPermanentDeleteProduct(productIds, note);
+        this.success(ctx, result);
+      } catch (error) {
+        app.logger.error('批量永久删除失败', error);
+        this.fail(ctx, error.message, 400);
+      }
+    }
   };
 };

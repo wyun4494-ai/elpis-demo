@@ -7,7 +7,9 @@ module.exports = {
           page: { type: 'string' },
           pageSize: { type: 'string' },
           brand_name: { type: 'string' },
-          first_letter: { type: 'string' }
+          first_letter: { type: 'string' },
+          sort_field: { type: 'string' },
+          sort_order: { type: 'string' }
         }
       }
     }
