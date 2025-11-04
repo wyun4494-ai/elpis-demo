@@ -352,6 +352,22 @@ module.exports = {
                   product_id: 'schema::product_id'
                 }
               }
+            }],
+            batchButtons: [{
+              label: '批量上架',
+              value: 'batchShelfOn',
+              type: 'success',
+              eventKey: 'batchShelfOn'
+            }, {
+              label: '批量下架',
+              value: 'batchShelfOff',
+              type: 'warning',
+              eventKey: 'batchShelfOff'
+            }, {
+              label: '批量删除',
+              value: 'batchDelete',
+              type: 'danger',
+              eventKey: 'batchDelete'
             }]
           },
           componentConfig: {

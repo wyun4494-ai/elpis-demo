@@ -119,7 +119,7 @@ module.exports = (app) => {
 
       // 11. 处理排序
       // 允许排序的字段白名单（防止 SQL 注入）
-      const allowedSortFields = ['price', 'inventory', 'create_time', 'product_id'];
+      const allowedSortFields = ['price', 'inventory', 'create_time', 'product_id', 'sort_order'];
       let orderByField = 'create_time';
       let orderByDirection = 'desc';
 
@@ -151,6 +151,7 @@ module.exports = (app) => {
         // 确保状态字段是数字类型
         item.status = parseInt(item.status);
         item.shelf_status = parseInt(item.shelf_status);
+        item.sort_order = parseInt(item.sort_order) || 0;
 
         // 解析商品图片JSON
         if (item.product_images) {
@@ -309,6 +310,7 @@ module.exports = (app) => {
         // 确保状态字段是数字类型
         product.status = parseInt(product.status);
         product.shelf_status = parseInt(product.shelf_status);
+        product.sort_order = parseInt(product.sort_order) || 0;
         
         // 解析商品图片JSON
         if (product.product_images) {
