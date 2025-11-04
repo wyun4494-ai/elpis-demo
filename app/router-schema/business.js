@@ -84,6 +84,12 @@ module.exports = {
           shelf_status: {
             type: 'number',
           },
+          product_images: {
+            type: 'array',
+          },
+          product_detail: {
+            type: 'string',
+          },
           skus: {
             type: 'array',
           },
@@ -124,6 +130,9 @@ module.exports = {
           },
           product_images: {
             type: 'array',
+          },
+          product_detail: {
+            type: 'string',
           },
           skus: {
             type: 'array',

@@ -124,6 +124,7 @@ CREATE TABLE IF NOT EXISTS `t_product` (
   `product_id` VARCHAR(64) NOT NULL COMMENT '商品ID',
   `product_name` VARCHAR(200) NOT NULL COMMENT '商品名称',
   `product_images` JSON COMMENT '商品图片（JSON数组）',
+  `product_detail` LONGTEXT COMMENT '商品详情（富文本HTML内容）',
   `category_id` VARCHAR(64) DEFAULT NULL COMMENT '所属分类ID（末级）',
   `type_id` VARCHAR(64) DEFAULT NULL COMMENT '商品类型ID',
   `category_l1_id` VARCHAR(64) DEFAULT NULL COMMENT '一级分类ID',

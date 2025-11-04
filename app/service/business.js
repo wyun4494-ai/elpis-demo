@@ -538,15 +538,16 @@ module.exports = (app) => {
      * 创建商品
      */
     async createProduct(params) {
-      const { 
-        product_name, 
-        category_id, 
-        brand_id, 
-        price, 
-        item_number, 
-        inventory, 
+      const {
+        product_name,
+        category_id,
+        brand_id,
+        price,
+        item_number,
+        inventory,
         shelf_status,
         product_images,
+        product_detail,
         skus = [],
         params: productParams = {}
       } = params;
@@ -583,6 +584,7 @@ module.exports = (app) => {
         product_id: productId,
         product_name,
         product_images: product_images ? JSON.stringify(product_images) : null,
+        product_detail: product_detail || null,
         category_id: category_id || null,
         category_l1_id: categoryLevels.category_l1_id,
         category_l2_id: categoryLevels.category_l2_id,
@@ -654,6 +656,7 @@ module.exports = (app) => {
         inventory,
         shelf_status,
         product_images,
+        product_detail,
         skus,
         params: productParams
       } = params;
@@ -667,6 +670,7 @@ module.exports = (app) => {
 
         if (product_name !== undefined) updateData.product_name = product_name;
         if (product_images !== undefined) updateData.product_images = product_images ? JSON.stringify(product_images) : null;
+        if (product_detail !== undefined) updateData.product_detail = product_detail || null;
         if (brand_id !== undefined) updateData.brand_id = brand_id;
         if (price !== undefined) updateData.price = price;
         if (item_number !== undefined) updateData.item_number = item_number;
@@ -1121,7 +1125,7 @@ module.exports = (app) => {
      * @param {string} note - 删除备注
      * @returns {Promise<Object>} 返回批量删除结果
      */
-    async batchPermanentDeleteProduct(productIds, note) {
+    async batchPermanentDeleteProduct(productIds) {
       if (!productIds || productIds.length === 0) {
         throw new Error('商品ID列表不能为空');
       }

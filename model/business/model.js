@@ -55,6 +55,22 @@ module.exports = {
                   maxSize: 2048
                 },
               },
+              product_detail: {
+                type: 'string',
+                label: '商品详情',
+                createFormOption: {
+                  comType: 'tiptap-editor',
+                  placeholder: '请输入商品详情描述（支持富文本编辑）'
+                },
+                editFormOption: {
+                  comType: 'tiptap-editor',
+                  placeholder: '请输入商品详情描述（支持富文本编辑）'
+                },
+                detailPanelOption: {
+                  comType: 'html',
+                  span: 24
+                }
+              },
               product_name: {
                 type: 'string',
                 label: '商品名称',

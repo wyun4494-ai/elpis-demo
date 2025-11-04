@@ -429,7 +429,7 @@ module.exports = (app) => {
      * @throws {Error} 如果参数无效或 SKU 不存在，抛出异常
      */
     async restock(params) {
-      const { sku_id: skuId, restock_quantity: quantity, note = '' } = params;
+      const { sku_id: skuId, restock_quantity: quantity } = params;
 
       // 1. 验证参数
       if (!skuId) {
@@ -502,7 +502,7 @@ module.exports = (app) => {
      * @throws {Error} 如果参数无效，抛出异常
      */
     async batchRestock(params) {
-      const { restock_list: restockList, note = '' } = params;
+      const { restock_list: restockList } = params;
 
       // 1. 验证参数
       if (!restockList || !Array.isArray(restockList) || restockList.length === 0) {
