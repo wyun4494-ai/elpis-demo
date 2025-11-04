@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS `t_product` (
   `inventory` INT DEFAULT 0 COMMENT '库存',
   `status` TINYINT(1) DEFAULT 1 COMMENT '状态：1-正常，0-已删除',
   `shelf_status` TINYINT(1) DEFAULT 0 COMMENT '上架状态：1-上架，0-下架',
+  `sort_order` INT DEFAULT 0 COMMENT '排序（数字越小越靠前）',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `delete_time` DATETIME DEFAULT NULL COMMENT '删除时间',
@@ -155,7 +156,8 @@ CREATE TABLE IF NOT EXISTS `t_product` (
   KEY `idx_brand_id` (`brand_id`),
   KEY `idx_status_shelf` (`status`, `shelf_status`),
   KEY `idx_type` (`type_id`),
-  KEY `idx_delete_time` (`delete_time`)
+  KEY `idx_delete_time` (`delete_time`),
+  KEY `idx_sort_order` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品表';
 
 -- ================================================================

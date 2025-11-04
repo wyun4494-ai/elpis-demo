@@ -277,6 +277,28 @@ module.exports = {
                 },
                 detailPanelOption: {}
               },
+              sort_order: {
+                type: 'number',
+                label: '排序',
+                tableOption: {
+                  width: 100,
+                  sortable: 'custom'
+                },
+                createFormOption: {
+                  comType: 'input-number',
+                  default: 0,
+                  min: 0,
+                  step: 1,
+                  placeholder: '数字越小越靠前'
+                },
+                editFormOption: {
+                  comType: 'input-number',
+                  min: 0,
+                  step: 1,
+                  placeholder: '数字越小越靠前'
+                },
+                detailPanelOption: {}
+              },
               sku_stock_status: {
                 type: 'string',
                 label: 'SKU库存',

@@ -546,6 +546,7 @@ module.exports = (app) => {
         item_number,
         inventory,
         shelf_status,
+        sort_order,
         product_images,
         product_detail,
         skus = [],
@@ -596,6 +597,7 @@ module.exports = (app) => {
         inventory: inventory || 0,
         status: 1,
         shelf_status: shelf_status !== undefined ? shelf_status : 0,
+        sort_order: sort_order !== undefined ? sort_order : 0,
         create_time: new Date(),
         update_time: new Date()
       });
@@ -655,6 +657,7 @@ module.exports = (app) => {
         item_number,
         inventory,
         shelf_status,
+        sort_order,
         product_images,
         product_detail,
         skus,
@@ -676,6 +679,7 @@ module.exports = (app) => {
         if (item_number !== undefined) updateData.item_number = item_number;
         if (inventory !== undefined) updateData.inventory = inventory;
         if (shelf_status !== undefined) updateData.shelf_status = shelf_status;
+        if (sort_order !== undefined) updateData.sort_order = sort_order;
 
         // 如果修改了分类，需要更新各层级分类ID
         if (category_id !== undefined) {
