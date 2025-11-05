@@ -299,6 +299,24 @@ module.exports = {
                 },
                 detailPanelOption: {}
               },
+              audit_status: {
+                type: 'number',
+                label: '审核状态',
+                tableOption: {
+                  width: 130,
+                  comType: 'auditStatusButton'
+                },
+                searchOption: {
+                  comType: 'select',
+                  enumList: [
+                    { label: '全部', value: -999 },
+                    { label: '未审核', value: 0 },
+                    { label: '已审核', value: 1 },
+                    { label: '审核不通过', value: 2 }
+                  ]
+                },
+                detailPanelOption: {}
+              },
               sku_stock_status: {
                 type: 'string',
                 label: 'SKU库存',
@@ -379,7 +397,8 @@ module.exports = {
             skuEditDialog: {
               mainKey: 'product_id',
               title: '编辑SKU',
-              saveBtnText: '保存'
+              saveBtnText: '保存',
+              size: '70%'
             },
             createForm: {
               title: '添加商品',
@@ -394,6 +413,7 @@ module.exports = {
               mainKey: 'product_id',
               title: '查看商品'
             },
+            auditDetailDialog: {},
             demoComponent: {}
           }
         }
@@ -1394,6 +1414,106 @@ module.exports = {
           }
         }
       ]
+    },{
+      key: 'product-audit',
+      name: '商品审核',
+      menuType: 'module',
+      moduleType: 'schema',
+      schemaConfig: {
+        api: '/api/proj/product-audit',
+        schema: {
+          type: 'object',
+          properties: {
+            product_name: {
+              type: 'string',
+              label: '商品名称',
+              tableOption: {
+                minWidth: 200  // 使用 minWidth 代替 width，让列自动填充剩余空间
+              },
+              searchOption: {
+                comType: 'input',
+                placeholder: '请输入商品名称'
+              }
+            },
+            category_name: {
+              type: 'string',
+              label: '商品分类',
+              tableOption: {
+                width: 150
+              }
+            },
+            brand_name: {
+              type: 'string',
+              label: '品牌',
+              tableOption: {
+                width: 120
+              }
+            },
+            price: {
+              type: 'number',
+              label: '价格',
+              tableOption: {
+                width: 120
+              }
+            },
+            audit_status: {
+              type: 'number',
+              label: '审核状态',
+              tableOption: {
+                width: 130,
+                comType: 'auditStatusButton',
+                eventKey: 'showComponent',
+                eventOption: {
+                  comName: 'auditDetailDialog',
+                  mode: 'view'
+                }
+              },
+              searchOption: {
+                comType: 'select',
+                enumList: [{
+                  label: '全部',
+                  value: -999
+                }, {
+                  label: '未审核',
+                  value: 0
+                }, {
+                  label: '已审核',
+                  value: 1
+                }, {
+                  label: '审核不通过',
+                  value: 2
+                }]
+              }
+            },
+            create_time: {
+              type: 'string',
+              label: '创建时间',
+              tableOption: {
+                width: 180
+              },
+              searchOption: {
+                comType: 'date-range',
+                placeholder: '请选择创建时间范围'
+              }
+            }
+          }
+        },
+        tableConfig: {
+          selectable: false,
+          rowButtons: [{
+            label: '审核',
+            type: 'primary',
+            eventKey: 'showComponent',
+            eventOption: {
+              comName: 'auditDetailDialog'
+            },
+            show: (row) => row.audit_status === 0
+          }]
+        },
+        componentConfig: {
+          auditDetailDialog: {}
+        }
+      }
     },{
       key: 'stock-alert',
       name: '库存预警',

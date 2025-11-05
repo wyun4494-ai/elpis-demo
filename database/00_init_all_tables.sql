@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS `t_product` (
   `status` TINYINT(1) DEFAULT 1 COMMENT '状态：1-正常，0-已删除',
   `shelf_status` TINYINT(1) DEFAULT 0 COMMENT '上架状态：1-上架，0-下架',
   `sort_order` INT DEFAULT 0 COMMENT '排序（数字越小越靠前）',
+  `audit_status` TINYINT(1) DEFAULT 0 COMMENT '审核状态：0-未审核，1-已审核，2-审核不通过',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `delete_time` DATETIME DEFAULT NULL COMMENT '删除时间',
@@ -157,7 +158,8 @@ CREATE TABLE IF NOT EXISTS `t_product` (
   KEY `idx_status_shelf` (`status`, `shelf_status`),
   KEY `idx_type` (`type_id`),
   KEY `idx_delete_time` (`delete_time`),
-  KEY `idx_sort_order` (`sort_order`)
+  KEY `idx_sort_order` (`sort_order`),
+  KEY `idx_audit_status` (`audit_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品表';
 
 -- ================================================================
@@ -221,7 +223,29 @@ CREATE TABLE IF NOT EXISTS `t_stock_alert_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存预警日志表';
 
 -- ================================================================
--- 11. 商品删除日志表
+-- 11. 商品审核表
+-- ================================================================
+CREATE TABLE IF NOT EXISTS `t_product_audit` (
+  `audit_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '审核记录ID',
+  `product_id` VARCHAR(64) NOT NULL COMMENT '关联的商品ID',
+  `audit_type` TINYINT(1) NOT NULL COMMENT '审核类型：1-新建审核，2-编辑审核',
+  `audit_status` TINYINT(1) NOT NULL COMMENT '审核结果：1-审核通过，2-审核不通过',
+  `audit_reason` VARCHAR(500) COMMENT '审核意见/不通过原因',
+  `auditor_id` VARCHAR(64) COMMENT '审核人ID',
+  `auditor_name` VARCHAR(50) COMMENT '审核人姓名',
+  `audit_time` DATETIME NOT NULL COMMENT '审核时间',
+  `old_data` JSON COMMENT '编辑前的商品数据（仅审核类型为"编辑审核"时记录）',
+  `new_data` JSON COMMENT '编辑后的商品数据（仅审核类型为"编辑审核"时记录）',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+
+  KEY `idx_product_id` (`product_id`),
+  KEY `idx_audit_status_time` (`audit_status`, `audit_time`),
+  KEY `idx_auditor` (`auditor_id`),
+  KEY `idx_audit_type` (`audit_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品审核表';
+
+-- ================================================================
+-- 12. 商品删除日志表
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_product_delete_log` (
   `id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '自增主键',
@@ -237,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `t_product_delete_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品删除日志表';
 
 -- ================================================================
--- 12. 用户表
+-- 13. 用户表
 -- ================================================================
 CREATE TABLE IF NOT EXISTS `t_user` (
   `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID',

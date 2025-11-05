@@ -71,9 +71,9 @@ module.exports = (app) => {
       const params = ctx.request.body;
       const { business: businessService } = app.service;
 
-      // 业务规则：如果创建时直接上架，需要验证库存不能为0
-      if (params.shelf_status === 1 && params.inventory === 0) {
-        this.fail(ctx, '总库存为0，不能上架', 400);
+      // 业务规则：新建商品不允许直接上架（需要先审核）
+      if (params.shelf_status === 1) {
+        this.fail(ctx, '新建商品需要先审核通过才能上架', 400);
         return;
       }
 
@@ -98,12 +98,18 @@ module.exports = (app) => {
       const params = ctx.request.body;
       const { business: businessService } = app.service;
 
-      // 业务规则：如果是上架操作，需要验证库存不能为0
+      // 业务规则：如果是上架操作，需要验证库存和审核状态
       if (params.shelf_status === 1) {
         const product = await businessService.getProduct(params.product_id);
-        if (product && product.inventory === 0) {
-          this.fail(ctx, '总库存为0，不能上架', 400);
-          return;
+        if (product) {
+          if (product.inventory === 0) {
+            this.fail(ctx, '总库存为0，不能上架', 400);
+            return;
+          }
+          if (product.audit_status !== 1) {
+            this.fail(ctx, '商品未审核通过，不能上架', 400);
+            return;
+          }
         }
       }
 

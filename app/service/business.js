@@ -152,6 +152,7 @@ module.exports = (app) => {
         item.status = parseInt(item.status);
         item.shelf_status = parseInt(item.shelf_status);
         item.sort_order = parseInt(item.sort_order) || 0;
+        item.audit_status = parseInt(item.audit_status) || 0;
 
         // 解析商品图片JSON
         if (item.product_images) {
@@ -311,7 +312,8 @@ module.exports = (app) => {
         product.status = parseInt(product.status);
         product.shelf_status = parseInt(product.shelf_status);
         product.sort_order = parseInt(product.sort_order) || 0;
-        
+        product.audit_status = parseInt(product.audit_status) || 0;
+
         // 解析商品图片JSON
         if (product.product_images) {
           try {
@@ -600,6 +602,7 @@ module.exports = (app) => {
         status: 1,
         shelf_status: shelf_status !== undefined ? shelf_status : 0,
         sort_order: sort_order !== undefined ? sort_order : 0,
+        audit_status: 0, // 新建商品默认为未审核
         create_time: new Date(),
         update_time: new Date()
       });
@@ -666,11 +669,15 @@ module.exports = (app) => {
         params: productParams
       } = params;
 
+      // 获取编辑前的商品数据（用于审核记录）
+      const oldProduct = await this.getProduct(productId);
+
       // 使用事务处理商品和 SKU 的更新
       await app.database.transaction(async (trx) => {
         // 1. 构建商品更新对象，只更新传入的字段
         const updateData = {
-          update_time: new Date()
+          update_time: new Date(),
+          audit_status: 0 // 编辑后重置为未审核状态
         };
 
         if (product_name !== undefined) updateData.product_name = product_name;
@@ -764,6 +771,11 @@ module.exports = (app) => {
           }
         }
       });
+
+      // 记录编辑审核（保存新旧数据对比）
+      const { productAudit: productAuditService } = app.service;
+      const newProduct = await this.getProduct(productId);
+      await productAuditService.recordEditAudit(productId, oldProduct, newProduct);
 
       return true;
     }
@@ -944,17 +956,24 @@ module.exports = (app) => {
         throw new Error('请选择要上架的商品');
       }
 
-      // 1. 检查所有商品的库存是否为0
+      // 1. 检查所有商品的库存和审核状态
       const products = await app.database('t_product')
         .whereIn('product_id', productIds)
         .where('status', 1)
-        .select('product_id', 'product_name', 'inventory');
+        .select('product_id', 'product_name', 'inventory', 'audit_status');
 
+      // 检查库存为0的商品
       const zeroInventoryProducts = products.filter(p => parseInt(p.inventory) === 0);
-
       if (zeroInventoryProducts.length > 0) {
         const productNames = zeroInventoryProducts.map(p => p.product_name).join('、');
         throw new Error(`以下商品库存为0，无法上架：${productNames}`);
+      }
+
+      // 检查未审核通过的商品
+      const notAuditedProducts = products.filter(p => parseInt(p.audit_status) !== 1);
+      if (notAuditedProducts.length > 0) {
+        const productNames = notAuditedProducts.map(p => p.product_name).join('、');
+        throw new Error(`以下商品未审核通过，无法上架：${productNames}`);
       }
 
       // 2. 批量更新上架状态
