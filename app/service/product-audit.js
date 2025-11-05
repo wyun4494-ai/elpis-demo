@@ -104,6 +104,7 @@ module.exports = (app) => {
       // 8. 数据类型转换
       list.forEach(item => {
         item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
+        item.update_time = item.update_time ? moment(item.update_time).format('YYYY-MM-DD HH:mm:ss') : null;
         item.price = parseFloat(item.price);
         item.inventory = parseInt(item.inventory);
         item.status = parseInt(item.status);
@@ -145,6 +146,7 @@ module.exports = (app) => {
 
       // 2. 数据类型转换
       product.create_time = moment(product.create_time).format('YYYY-MM-DD HH:mm:ss');
+      product.update_time = product.update_time ? moment(product.update_time).format('YYYY-MM-DD HH:mm:ss') : null;
       product.price = parseFloat(product.price);
       product.inventory = parseInt(product.inventory);
       product.status = parseInt(product.status);
@@ -306,6 +308,88 @@ module.exports = (app) => {
         new_data: JSON.stringify(newData),
         audit_time: moment().format('YYYY-MM-DD HH:mm:ss')
       });
+    }
+
+    /**
+     * 批量审核商品
+     *
+     * @param {Array<string>} productIds - 商品ID列表
+     * @param {number} auditStatus - 审核结果（1-审核通过，2-审核不通过）
+     * @param {string} auditReason - 审核意见/不通过原因
+     * @param {string} auditorId - 审核人ID
+     * @param {string} auditorName - 审核人姓名
+     * @returns {Promise<Object>} 返回批量审核结果
+     */
+    async batchAudit(productIds, auditStatus, auditReason, auditorId, auditorName) {
+      if (!productIds || productIds.length === 0) {
+        throw new Error('商品ID列表不能为空');
+      }
+
+      if (auditStatus === 2 && !auditReason) {
+        throw new Error('审核不通过时必须填写拒绝原因');
+      }
+
+      const auditTime = moment().format('YYYY-MM-DD HH:mm:ss');
+      let successCount = 0;
+      let failCount = 0;
+      const errors = [];
+
+      // 使用事务处理批量审核
+      await app.database.transaction(async (trx) => {
+        for (const productId of productIds) {
+          try {
+            // 1. 检查商品是否存在且待审核
+            const product = await trx('t_product')
+              .where('product_id', productId)
+              .where('status', 1)
+              .first();
+
+            if (!product) {
+              failCount++;
+              errors.push({ product_id: productId, reason: '商品不存在或已删除' });
+              continue;
+            }
+
+            if (product.audit_status !== 0) {
+              failCount++;
+              errors.push({ product_id: productId, reason: '商品已审核，无需重复审核' });
+              continue;
+            }
+
+            // 2. 更新商品审核状态
+            await trx('t_product')
+              .where('product_id', productId)
+              .update({
+                audit_status: auditStatus,
+                update_time: auditTime
+              });
+
+            // 3. 插入审核历史记录
+            await trx('t_product_audit').insert({
+              product_id: productId,
+              audit_type: 1, // 新建审核
+              audit_status: auditStatus,
+              audit_reason: auditReason || (auditStatus === 1 ? '批量审核通过' : '批量审核不通过'),
+              auditor_id: auditorId,
+              auditor_name: auditorName,
+              audit_time: auditTime
+            });
+
+            successCount++;
+          } catch (error) {
+            failCount++;
+            errors.push({ product_id: productId, reason: error.message });
+          }
+        }
+      });
+
+      return {
+        success: true,
+        success_count: successCount,
+        fail_count: failCount,
+        errors: errors,
+        message: `批量审核完成：成功 ${successCount} 条，失败 ${failCount} 条`
+      };
     }
   };
 };

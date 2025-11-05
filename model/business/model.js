@@ -238,6 +238,28 @@ module.exports = {
                 },
                 detailPanelOption: {}
               },
+              sort_order: {
+                type: 'number',
+                label: '排序',
+                tableOption: {
+                  width: 100,
+                  sortable: 'custom'
+                },
+                createFormOption: {
+                  comType: 'input-number',
+                  default: 0,
+                  min: 0,
+                  step: 1,
+                  placeholder: '数字越小越靠前'
+                },
+                editFormOption: {
+                  comType: 'input-number',
+                  min: 0,
+                  step: 1,
+                  placeholder: '数字越小越靠前'
+                },
+                detailPanelOption: {}
+              },
               shelf_status: {
                 type: 'number',
                 label: '标签',
@@ -260,42 +282,12 @@ module.exports = {
                     value: 0
                   }]
                 },
-                createFormOption: {
-                  comType: 'switch',
-                  activeValue: 1,
-                  inactiveValue: 0,
-                  activeText: '上架',
-                  inactiveText: '下架',
-                  default: 0
-                },
                 editFormOption: {
                   comType: 'switch',
                   activeValue: 1,
                   inactiveValue: 0,
                   activeText: '上架',
                   inactiveText: '下架'
-                },
-                detailPanelOption: {}
-              },
-              sort_order: {
-                type: 'number',
-                label: '排序',
-                tableOption: {
-                  width: 100,
-                  sortable: 'custom'
-                },
-                createFormOption: {
-                  comType: 'input-number',
-                  default: 0,
-                  min: 0,
-                  step: 1,
-                  placeholder: '数字越小越靠前'
-                },
-                editFormOption: {
-                  comType: 'input-number',
-                  min: 0,
-                  step: 1,
-                  placeholder: '数字越小越靠前'
                 },
                 detailPanelOption: {}
               },
@@ -1492,14 +1484,23 @@ module.exports = {
                 width: 180
               },
               searchOption: {
-                comType: 'date-range',
+                comType: 'dateRange',  // ✅ 修复：使用正确的组件类型名称
                 placeholder: '请选择创建时间范围'
-              }
+              },
+              detailPanelOption: {}
+            },
+            update_time: {
+              type: 'string',
+              label: '更新时间',
+              tableOption: {
+                width: 180
+              },
+              detailPanelOption: {}
             }
           }
         },
         tableConfig: {
-          selectable: false,
+          selectable: true,  // ✅ 启用多选功能（用于批量审核）
           rowButtons: [{
             label: '审核',
             type: 'primary',
@@ -1508,10 +1509,22 @@ module.exports = {
               comName: 'auditDetailDialog'
             },
             show: (row) => row.audit_status === 0
+          }],
+          batchButtons: [{
+            label: '批量审核通过',
+            value: 'batchApprove',
+            type: 'success',
+            eventKey: 'batchApprove'
+          }, {
+            label: '批量审核拒绝',
+            value: 'batchReject',
+            type: 'danger',
+            eventKey: 'batchReject'
           }]
         },
         componentConfig: {
-          auditDetailDialog: {}
+          auditDetailDialog: {},
+          batchAuditDialog: {}
         }
       }
     },{

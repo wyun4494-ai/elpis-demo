@@ -113,6 +113,70 @@ module.exports = (app) => {
         this.fail(ctx, error.message, 500);
       }
     }
+
+    /**
+     * 批量审核通过
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {Array<string>} ctx.request.body.product_ids - 商品ID列表
+     * @param {string} [ctx.request.body.audit_reason] - 审核意见
+     * @returns {Promise<void>}
+     */
+    async batchApprove(ctx) {
+      const { product_ids: productIds, audit_reason: auditReason } = ctx.request.body;
+      const { productAudit: productAuditService } = app.service;
+
+      // 获取当前用户ID和姓名
+      const auditorId = ctx.userId || 'system';
+      const auditorName = ctx.userName || '系统管理员';
+
+      try {
+        const result = await productAuditService.batchAudit(
+          productIds,
+          1, // 审核通过
+          auditReason,
+          auditorId,
+          auditorName
+        );
+        this.success(ctx, result);
+      } catch (error) {
+        app.logger.error('批量审核通过失败', error);
+        this.fail(ctx, error.message, 500);
+      }
+    }
+
+    /**
+     * 批量审核拒绝
+     *
+     * @param {Object} ctx - Koa 上下文对象
+     * @param {Object} ctx.request.body - 请求体参数
+     * @param {Array<string>} ctx.request.body.product_ids - 商品ID列表
+     * @param {string} ctx.request.body.audit_reason - 拒绝原因（必填）
+     * @returns {Promise<void>}
+     */
+    async batchReject(ctx) {
+      const { product_ids: productIds, audit_reason: auditReason } = ctx.request.body;
+      const { productAudit: productAuditService } = app.service;
+
+      // 获取当前用户ID和姓名
+      const auditorId = ctx.userId || 'system';
+      const auditorName = ctx.userName || '系统管理员';
+
+      try {
+        const result = await productAuditService.batchAudit(
+          productIds,
+          2, // 审核不通过
+          auditReason,
+          auditorId,
+          auditorName
+        );
+        this.success(ctx, result);
+      } catch (error) {
+        app.logger.error('批量审核拒绝失败', error);
+        this.fail(ctx, error.message, 500);
+      }
+    }
   };
 };
 

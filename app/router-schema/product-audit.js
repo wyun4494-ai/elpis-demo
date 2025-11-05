@@ -53,6 +53,38 @@ module.exports = {
       },
       required: ['product_id']
     }
+  },
+
+  // 批量审核通过
+  '/api/proj/product-audit/batch-approve': {
+    method: 'post',
+    schema: {
+      type: 'object',
+      properties: {
+        product_ids: {
+          type: 'array',
+          items: { type: 'string' }
+        },
+        audit_reason: { type: 'string' }
+      },
+      required: ['product_ids']
+    }
+  },
+
+  // 批量审核拒绝
+  '/api/proj/product-audit/batch-reject': {
+    method: 'post',
+    schema: {
+      type: 'object',
+      properties: {
+        product_ids: {
+          type: 'array',
+          items: { type: 'string' }
+        },
+        audit_reason: { type: 'string' }
+      },
+      required: ['product_ids', 'audit_reason']
+    }
   }
 };
 

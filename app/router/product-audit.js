@@ -12,5 +12,9 @@ module.exports = (app, router) => {
 
   // 审核历史路由
   router.get('/api/proj/product-audit/history', productAuditController.getAuditHistory.bind(productAuditController));
+
+  // 批量审核路由
+  router.post('/api/proj/product-audit/batch-approve', productAuditController.batchApprove.bind(productAuditController));
+  router.post('/api/proj/product-audit/batch-reject', productAuditController.batchReject.bind(productAuditController));
 };
 
