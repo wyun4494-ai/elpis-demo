@@ -13,7 +13,6 @@
  */
 module.exports = (app) => {
   const BaseService = require('@lesheng/elpis').Service.Base(app);
-  const { v4: uuidv4 } = require('uuid');
   const moment = require('moment');
   const { pinyin } = require('pinyin-pro');
 

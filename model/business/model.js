@@ -11,6 +11,7 @@ module.exports = {
       menu: [{
         key: 'product-list',
         name: '商品列表',
+        icon: 'List',
         menuType: 'module',
         moduleType: 'schema',
         schemaConfig: {
@@ -412,10 +413,12 @@ module.exports = {
       }, {
         key: 'product-config',
         name: '商品配置',
+        icon: 'Setting',
         menuType: 'group',
         subMenu: [{
           key: 'product-category',
           name: '商品分类',
+          icon: 'FolderOpened',
           menuType: 'module',
           moduleType: 'schema',
           schemaConfig: {
@@ -593,10 +596,12 @@ module.exports = {
         },{
           key: 'product-type',
           name: '商品类型',
+          icon: 'Grid',
           menuType: 'group',
           subMenu: [{
             key: 'type-manage',
             name: '类型管理',
+            icon: 'Management',
             menuType: 'module',
             moduleType: 'schema',
             schemaConfig: {
@@ -685,6 +690,7 @@ module.exports = {
           }, {
             key: 'product-attribute',
             name: '商品属性管理',
+            icon: 'Tickets',
             menuType: 'module',
             moduleType: 'schema',
             schemaConfig: {
@@ -874,6 +880,7 @@ module.exports = {
           }, {
             key: 'product-param',
             name: '商品参数管理',
+            icon: 'List',
             menuType: 'module',
             moduleType: 'schema',
             schemaConfig: {
@@ -1034,6 +1041,7 @@ module.exports = {
           }, {
             key: 'param-library',
             name: '参数库管理',
+            icon: 'Collection',
             menuType: 'module',
             moduleType: 'schema',
             schemaConfig: {
@@ -1192,6 +1200,7 @@ module.exports = {
         },{
           key: 'product-brand',
           name: '商品品牌',
+          icon: 'Star',
           menuType: 'module',
           moduleType: 'schema',
           schemaConfig: {
@@ -1409,6 +1418,7 @@ module.exports = {
     },{
       key: 'product-audit',
       name: '商品审核',
+      icon: 'CircleCheck',
       menuType: 'module',
       moduleType: 'schema',
       schemaConfig: {
@@ -1481,7 +1491,8 @@ module.exports = {
               type: 'string',
               label: '创建时间',
               tableOption: {
-                width: 180
+                width: 180,
+                sortable: 'custom'
               },
               searchOption: {
                 comType: 'dateRange',  // ✅ 修复：使用正确的组件类型名称
@@ -1493,7 +1504,8 @@ module.exports = {
               type: 'string',
               label: '更新时间',
               tableOption: {
-                width: 180
+                width: 180,
+                sortable: 'custom'
               },
               detailPanelOption: {}
             }
@@ -1530,6 +1542,7 @@ module.exports = {
     },{
       key: 'stock-alert',
       name: '库存预警',
+      icon: 'Warning',
       menuType: 'module',
       moduleType: 'schema',
       schemaConfig: {
@@ -1639,6 +1652,7 @@ module.exports = {
     },{
       key: 'product-recycle',
       name: '商品回收站',
+      icon: 'Delete',
       menuType: 'module',
       moduleType: 'schema',
       schemaConfig: {
