@@ -17,6 +17,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import $curl from '$elpisCommon/curl.js'
 
 const userName = ref('')
 
@@ -25,9 +27,39 @@ onMounted(() => {
   userName.value = localStorage.getItem('nickname') || '用户'
 })
 
-const handleUserCommand = function(event) {
+/**
+ * 处理用户下拉菜单命令
+ * @param {string} event - 命令类型（logout）
+ */
+const handleUserCommand = async function(event) {
   if (event === 'logout') {
-    window.location = `http://${window.location.host}/api/auth/logout`
+    try {
+      // 调用退出登录 API
+      const res = await $curl({
+        method: 'post',
+        url: '/api/proj/auth/logout',
+        data: {}
+      })
+
+      if (res && res.success) {
+        // 清除本地存储的用户信息
+        localStorage.removeItem('token')
+        localStorage.removeItem('nickname')
+        localStorage.removeItem('username')
+        localStorage.removeItem('user_id')
+        localStorage.removeItem('role_id')
+
+        ElMessage.success('退出登录成功')
+
+        // 跳转到登录页面
+        setTimeout(() => {
+          window.location.href = '/view/auth/login'
+        }, 500)
+      }
+    } catch (error) {
+      console.error('退出登录失败', error)
+      ElMessage.error('退出登录失败，请重试')
+    }
   }
 }
 </script>

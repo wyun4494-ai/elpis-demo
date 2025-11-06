@@ -1,6 +1,6 @@
 const { serverStart } = require('@lesheng/elpis');
 
-const app = serverStart({
+const _app = serverStart({
   name: 'ElpisDemo',
   icon: 'static/logo.png',
   homePage: '/view/project-list'

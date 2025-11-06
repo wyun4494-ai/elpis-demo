@@ -18,7 +18,9 @@ module.exports = {
   },
   apiSignVerify: {
     whiteList: [
-      '/api/auth/logout'
+      '/api/proj/auth/register', // 注册接口无需 Token
+      '/api/proj/auth/login',    // 登录接口无需 Token
+      '/api/auth/logout'         // 旧的登出接口（兼容）
     ]
   }
 }
