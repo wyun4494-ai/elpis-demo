@@ -1,7 +1,5 @@
 const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserWebpackPlugin = require('terser-webpack-plugin');
 
 module.exports = {
@@ -11,26 +9,6 @@ module.exports = {
     path: path.join(process.cwd(), './app/public/dist/prod/'),
     publicPath: '/dist/prod/',
     crossOriginLoading: 'anonymous'
-  },
-
-  // 只覆盖 JS 处理规则，保持 CSS 处理与 @lesheng/elpis 一致
-  module: {
-    rules: [{
-      test: /\.js$/,
-      include: [
-        // elpis 包的页面目录
-        path.resolve(process.cwd(), './node_modules/@lesheng/elpis/app/pages'),
-        // 业务项目的页面目录
-        path.resolve(process.cwd(), './app/pages')
-      ],
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env'],
-          plugins: ['@babel/plugin-transform-runtime']
-        }
-      }
-    }]
   },
 
   // 只覆盖必要的 plugins
