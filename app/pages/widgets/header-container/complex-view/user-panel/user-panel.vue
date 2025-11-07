@@ -19,6 +19,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import $curl from '$elpisCommon/curl.js'
+import Cookies from 'js-cookie'
 
 const userName = ref('')
 
@@ -42,12 +43,19 @@ const handleUserCommand = async function(event) {
       })
 
       if (res && res.success) {
-        // 清除本地存储的用户信息
+        // 1. 清除 localStorage 中的用户信息
         localStorage.removeItem('token')
         localStorage.removeItem('nickname')
         localStorage.removeItem('username')
         localStorage.removeItem('user_id')
         localStorage.removeItem('role_id')
+
+        // 2. 清除 sessionStorage 中的用户信息（如果有）
+        sessionStorage.removeItem('auth_token')
+
+        // 3. 清除前端可读的 Cookie（如果有）
+        // 注意：后端已经通过 Set-Cookie 清除了 HttpOnly Cookie
+        Cookies.remove('auth_token', { path: '/' })
 
         ElMessage.success('退出登录成功')
 

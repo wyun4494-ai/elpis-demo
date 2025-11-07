@@ -170,6 +170,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import $curl from '$elpisCommon/curl.js'
+import Cookies from 'js-cookie'
 
 // 基础配置
 const loading = ref(false)
@@ -290,10 +291,26 @@ const handleLogin = async () => {
 
     ElMessage.success('登录成功')
 
-    // 存储用户信息到 localStorage（Token 已存储在 Cookie 中）
+    // 存储用户信息到 localStorage
     localStorage.setItem('nickname', res.data.user.nickname)
     localStorage.setItem('username', res.data.user.username)
     localStorage.setItem('role_id', res.data.user.role_id)
+
+    // 注意：Token 已由后端通过 Set-Cookie 响应头设置到 Cookie 中（HttpOnly）
+    // 前端无法通过 JavaScript 读取或修改此 Cookie（安全性考虑）
+    // 如果需要前端也能读取 Token（用于某些场景），可以使用以下代码：
+    // if (loginForm.remember && res.data.token) {
+    //   // 使用 js-cookie 设置前端可读的 Token（非 HttpOnly）
+    //   Cookies.set('auth_token', res.data.token, {
+    //     expires: 7,           // 7 天
+    //     secure: false,        // 开发环境设为 false，生产环境设为 true
+    //     sameSite: 'Lax',      // 防止 CSRF 攻击
+    //     path: '/'
+    //   })
+    // } else if (res.data.token) {
+    //   // 不记住我：使用 sessionStorage（会话级存储）
+    //   sessionStorage.setItem('auth_token', res.data.token)
+    // }
 
     // 跳转到目标页面
     let path = '/view/project-list'

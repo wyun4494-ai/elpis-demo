@@ -92,10 +92,16 @@ module.exports = (app) => {
 
         // 将 Token 设置到 Cookie 中（用于后续请求的身份验证）
         const expiresIn = params.remember ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 记住我：7天，否则1天
+
+        // Cookie 安全配置
+        const isProduction = app.config.env === 'prod'
         ctx.cookies.set('token', result.token, {
-          httpOnly: true,
-          maxAge: expiresIn,
-          overwrite: true
+          httpOnly: true,           // 禁止前端 JavaScript 读取（防止 XSS 攻击）
+          maxAge: expiresIn,        // Cookie 有效期（毫秒）
+          overwrite: true,          // 覆盖同名 Cookie
+          secure: isProduction,     // 仅通过 HTTPS 传输（生产环境）
+          sameSite: 'lax',          // 防止 CSRF 攻击（'strict' | 'lax' | 'none'）
+          path: '/'                 // 全站可用
         })
 
         this.success(ctx, result)
