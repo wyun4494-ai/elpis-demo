@@ -37,9 +37,10 @@ module.exports = (app) => {
      * @param {string} [data.nickname] - 昵称
      * @param {string} [data.desc] - 描述
      * @param {number} [data.sex] - 性别（1-男，2-女）
+     * @param {number} [data.role_id] - 角色ID
      * @returns {Promise<string>} 返回用户ID
      */
-    async updateUser(userId, { nickname, desc, sex }) {
+    async updateUser(userId, { nickname, desc, sex, role_id: roleId }) {
       // 1. 构建更新对象（只更新传入的字段）
       const updateObj = {}
       if (nickname) {
@@ -50,6 +51,9 @@ module.exports = (app) => {
       }
       if (desc) {
         updateObj.desc = desc
+      }
+      if (roleId !== undefined) {
+        updateObj.role_id = roleId
       }
 
       // 2. 更新数据库

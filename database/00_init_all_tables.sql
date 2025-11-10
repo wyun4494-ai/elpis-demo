@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS `t_product_category` (
   `status` TINYINT DEFAULT 1 COMMENT '状态：1-启用，0-禁用',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  
+
+  UNIQUE KEY `uk_category_name_status` (`category_name`, `status`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_status` (`status`),
   KEY `idx_level` (`level`),
@@ -47,8 +48,8 @@ CREATE TABLE IF NOT EXISTS `t_product_brand` (
   `status` TINYINT DEFAULT 1 COMMENT '状态：1-启用，0-禁用',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  
-  UNIQUE KEY `uk_brand_name` (`brand_name`),
+
+  UNIQUE KEY `uk_brand_name_status` (`brand_name`, `status`),
   KEY `idx_status` (`status`),
   KEY `idx_first_letter` (`first_letter`),
   KEY `idx_sort` (`sort_order`)
@@ -61,10 +62,12 @@ CREATE TABLE IF NOT EXISTS `t_param_category` (
   `category_id` VARCHAR(64) NOT NULL PRIMARY KEY COMMENT '分类ID',
   `category_name` VARCHAR(50) NOT NULL COMMENT '分类名称',
   `sort_order` INT DEFAULT 0 NOT NULL COMMENT '排序',
+  `status` TINYINT DEFAULT 1 NOT NULL COMMENT '状态：1-启用，-1-删除',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
 
-  UNIQUE KEY `uk_category_name` (`category_name`)
+  UNIQUE KEY `uk_category_name_status` (`category_name`, `status`),
+  KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='参数分类表';
 
 -- ================================================================
@@ -80,7 +83,8 @@ CREATE TABLE IF NOT EXISTS `t_product_param_library` (
   `status` TINYINT DEFAULT 1 COMMENT '状态',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  UNIQUE KEY `uk_name_category` (`param_name`, `param_category`),
+
+  UNIQUE KEY `uk_name_category_status` (`param_name`, `param_category`, `status`),
   KEY `idx_category` (`param_category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品参数库';
 
@@ -144,8 +148,8 @@ CREATE TABLE IF NOT EXISTS `t_product` (
   `delete_time` DATETIME DEFAULT NULL COMMENT '删除时间',
   `delete_reason` VARCHAR(500) DEFAULT NULL COMMENT '删除原因',
   `deleted_by` VARCHAR(64) DEFAULT NULL COMMENT '删除人',
-  
-  UNIQUE KEY `uk_product_id` (`product_id`),
+
+  UNIQUE KEY `uk_product_id_status` (`product_id`, `status`),
   KEY `idx_product_name` (`product_name`),
   KEY `idx_status` (`status`),
   KEY `idx_create_time` (`create_time`),
@@ -274,10 +278,11 @@ CREATE TABLE IF NOT EXISTS `t_user` (
   `status` INT DEFAULT 1 NOT NULL COMMENT '状态：1-正常，-1-删除',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
   `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  
+
   UNIQUE KEY `uk_t_user_user_id` (`user_id`),
-  UNIQUE KEY `uk_t_user_username` (`username`),
-  KEY `idx_t_user_id` (`id`)
+  UNIQUE KEY `uk_t_user_username_status` (`username`, `status`),
+  KEY `idx_t_user_id` (`id`),
+  KEY `idx_t_user_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户信息表';
 
 -- ================================================================

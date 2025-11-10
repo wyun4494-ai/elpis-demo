@@ -59,11 +59,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { ElMessage } from 'element-plus';
 import $curl from '$elpisCurl';
 import HeaderContainer from '$elpisHeaderContainer';
 
 const loading = ref(false);
-const modelList = ref([]);  
+const modelList = ref([]);
+const userProjectList = ref([]);  // 用户有权限访问的项目列表
 
 async function getModelList() {
   loading.value = true;
@@ -75,7 +77,7 @@ async function getModelList() {
     });
     if (!res || !res.success || !res.data) {
       return;
-    } 
+    }
     modelList.value = res.data;
   } catch (error) {
     console.error('获取项目列表异常:', error);
@@ -84,10 +86,48 @@ async function getModelList() {
   }
 }
 
-onMounted(() => {
-  getModelList();
+// 获取用户有权限访问的项目列表
+async function getUserProjectList() {
+  try {
+    const res = await $curl({
+      method: 'get',
+      url: '/api/proj/user/project-list',
+      errorMessage: '获取用户项目权限失败'
+    });
+    if (res && res.success && Array.isArray(res.data)) {
+      userProjectList.value = res.data;
+    }
+  } catch (error) {
+    console.error('获取用户项目权限异常:', error);
+  }
+}
+
+onMounted(async () => {
+  await getUserProjectList();
+  await getModelList();
 });
+
 const onEnter = (projectItem) => {
+  // 权限检查：支持两种模式
+  // 1. 直接权限：project_key 直接匹配项目的 key（如 business-personnel）
+  // 2. 领域权限：project_key 匹配项目所属的领域模型（如 business 对应 jd、pdd、taobao）
+
+  const hasDirectPermission = userProjectList.value.includes(projectItem.key);
+  const hasModelPermission = projectItem.modelKey && userProjectList.value.includes(projectItem.modelKey);
+
+  // 调试
+  console.log('🔍 项目:', projectItem.name);
+  console.log('📌 项目 key:', projectItem.key);
+  console.log('📌 项目 modelKey:', projectItem.modelKey);
+  console.log('✅ 用户权限列表:', userProjectList.value);
+  console.log('🔐 直接权限:', hasDirectPermission);
+  console.log('🔐 领域权限:', hasModelPermission);
+
+  if (!hasDirectPermission && !hasModelPermission) {
+    ElMessage.warning('您没有权限访问此项目');
+    return;
+  }
+
   // 获取当前页面的 origin = 域名
   const { origin } = window.location;
   // 跳转到对应项目的首页
