@@ -24,10 +24,15 @@ module.exports = (app, router) => {
   // 创建用户
   router.post('/api/proj/user', userController.createUser.bind(userController))
 
+  // 更新用户（支持两种方式）
+  // 1. PUT /api/proj/user（body 中包含 user_id）- 用于编辑表单
+  // 2. PUT /api/proj/user/:user_id（路径参数）- 用于其他场景
+  router.put('/api/proj/user', userController.updateUser.bind(userController))
+
   // 获取用户详情
   router.get('/api/proj/user/:user_id', userController.getUser.bind(userController))
 
-  // 更新用户
+  // 更新用户（路径参数方式）
   router.put('/api/proj/user/:user_id', userController.updateUser.bind(userController))
 
   // 删除用户

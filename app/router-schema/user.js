@@ -50,6 +50,21 @@ module.exports = {
         },
         required: ['username']
       }
+    },
+    put: {
+      body: {
+        type: 'object',
+        properties: {
+          user_id: { type: 'string' },
+          nickname: { type: 'string' },
+          desc: { type: 'string' },
+          sex: { type: 'number' },
+          role_id: { type: 'number' },
+          new_password: { type: 'string', minLength: 6 },
+          confirm_password: { type: 'string' }
+        },
+        required: ['user_id']
+      }
     }
   },
 

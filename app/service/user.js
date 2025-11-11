@@ -9,6 +9,7 @@ module.exports = (app) => {
   const moment = require('moment')
   const { v4: uuidv4 } = require('uuid')
   const generatePassword = require('generate-password')
+  const bcrypt = require('bcrypt')
   const BaseService = require('@lesheng/elpis').Service.Base(app)
 
   return class UserService extends BaseService {
@@ -38,10 +39,31 @@ module.exports = (app) => {
      * @param {string} [data.desc] - 描述
      * @param {number} [data.sex] - 性别（1-男，2-女）
      * @param {number} [data.role_id] - 角色ID
+     * @param {string} [data.new_password] - 新密码（可选）
+     * @param {string} [data.confirm_password] - 确认密码（可选）
      * @returns {Promise<string>} 返回用户ID
+     * @throws {Error} 如果新密码和确认密码不一致，或密码为空字符串
      */
-    async updateUser(userId, { nickname, desc, sex, role_id: roleId }) {
-      // 1. 构建更新对象（只更新传入的字段）
+    async updateUser(userId, { nickname, desc, sex, role_id: roleId, new_password: newPassword, confirm_password: confirmPassword }) {
+      // 1. 验证密码字段（如果提供了新密码）
+      if (newPassword !== undefined && newPassword !== null && newPassword !== '') {
+        // 1.1 验证新密码不能为空字符串
+        if (newPassword.trim() === '') {
+          throw new Error('新密码不能为空')
+        }
+
+        // 1.2 验证新密码长度至少 6 位
+        if (newPassword.length < 6) {
+          throw new Error('新密码长度至少 6 位')
+        }
+
+        // 1.3 验证新密码和确认密码一致
+        if (newPassword !== confirmPassword) {
+          throw new Error('新密码和确认密码不一致')
+        }
+      }
+
+      // 2. 构建更新对象（只更新传入的字段）
       const updateObj = {}
       if (nickname) {
         updateObj.nickname = nickname
@@ -56,7 +78,13 @@ module.exports = (app) => {
         updateObj.role_id = roleId
       }
 
-      // 2. 更新数据库
+      // 3. 如果提供了新密码，使用 bcrypt 加密后更新
+      if (newPassword !== undefined && newPassword !== null && newPassword !== '') {
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        updateObj.password = hashedPassword
+      }
+
+      // 4. 更新数据库
       await app.database('t_user').update({
         ...updateObj,
         update_time: moment().format('YYYY-MM-DD HH:mm:ss')

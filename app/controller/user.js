@@ -34,37 +34,62 @@ module.exports = (app) => {
     /**
      * 更新用户信息
      *
+     * 支持两种方式：
+     * 1. PUT /api/proj/user/:user_id（路径参数）
+     * 2. PUT /api/proj/user（body 中包含 user_id）
+     *
      * @param {Object} ctx - Koa 上下文对象
      * @param {Object} ctx.params - 路径参数
-     * @param {string} ctx.params.user_id - 用户ID
+     * @param {string} [ctx.params.user_id] - 用户ID（路径参数）
      * @param {Object} ctx.request.body - 请求体参数
+     * @param {string} [ctx.request.body.user_id] - 用户ID（body 参数）
      * @param {string} [ctx.request.body.nickname] - 昵称
      * @param {string} [ctx.request.body.desc] - 描述
      * @param {number} [ctx.request.body.sex] - 性别（1-男，2-女）
      * @param {number} [ctx.request.body.role_id] - 角色ID
+     * @param {string} [ctx.request.body.new_password] - 新密码（可选）
+     * @param {string} [ctx.request.body.confirm_password] - 确认密码（可选）
      * @returns {Promise<void>}
      */
     async updateUser(ctx) {
-      const { user_id: userId } = ctx.params
+      // 优先从路径参数获取 user_id，其次从 body 中获取
+      const userIdFromParams = ctx.params.user_id
+      const userIdFromBody = ctx.request.body.user_id
+      const userId = userIdFromParams || userIdFromBody
+
+      if (!userId) {
+        this.fail(ctx, '用户ID不能为空', 400)
+        return
+      }
+
       const {
         nickname,
         desc,
         sex,
-        role_id: roleId
+        role_id: roleId,
+        new_password: newPassword,
+        confirm_password: confirmPassword
       } = ctx.request.body
 
       const { user: userService } = app.service
-      await userService.updateUser(userId, {
-        nickname,
-        desc,
-        sex,
-        role_id: roleId
-      })
 
-      this.success(ctx, {
-        message: '更新成功',
-        user_id: userId
-      })
+      try {
+        await userService.updateUser(userId, {
+          nickname,
+          desc,
+          sex,
+          role_id: roleId,
+          new_password: newPassword,
+          confirm_password: confirmPassword
+        })
+
+        this.success(ctx, {
+          message: '更新成功',
+          user_id: userId
+        })
+      } catch (error) {
+        this.fail(ctx, error.message || '更新失败', 400)
+      }
     }
 
     /**

@@ -17,27 +17,6 @@ module.exports = {
         name: '营销活动列表',
       }]
     }
-  }, {
-    key: 'shop-settings',
-    name: '店铺设置', 
-    menuType: 'group',
-    subMenu: [{
-      key: 'info',
-      name: '店铺信息',
-      menuType: 'module',
-      moduleType: 'custom',
-      customConfig: {
-        path: '/todo'
-      }
-    }, {
-      key: 'quality',
-      name: '资质信息',
-      menuType: 'module',
-      moduleType: 'iframe',
-      iframeConfig: {
-        path: 'https://leetcode.cn/'
-      }
-    }]
   }
   ]
 

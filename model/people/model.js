@@ -173,6 +173,23 @@ module.exports = {
             searchOption: {
               comType: 'dateRange',
             }
+          },
+          new_password: {
+            type: 'string',
+            label: '新密码',
+            editFormOption: {
+              comType: 'password-input',
+              placeholder: '请输入新密码（至少6位）',
+              minLength: 6
+            }
+          },
+          confirm_password: {
+            type: 'string',
+            label: '确认密码',
+            editFormOption: {
+              comType: 'password-input',
+              placeholder: '请再次输入新密码'
+            }
           }
         },
         required: ['username', 'nickname', 'sex', 'role_id']
