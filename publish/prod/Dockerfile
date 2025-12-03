@@ -12,19 +12,9 @@ COPY package*.json /app/elpis-demo/
 
 # 安装依赖（利用缓存，只有 package.json 变化时才重新安装）
 # 使用官方 npm registry 确保能获取最新发布的包
+# 使用 npm ci 代替 npm install 以获得更可靠的依赖安装
 RUN npm config set registry https://registry.npmjs.org && \
-    npm install --production=false
-
-# 验证 @lesheng/elpis 是否安装成功
-RUN echo "========== 验证依赖安装 ==========" && \
-    echo "检查 @lesheng/elpis 是否存在:" && \
-    ls -la node_modules/@lesheng/elpis/ || echo "❌ @lesheng/elpis 未找到！" && \
-    echo "" && \
-    echo "检查 package.json 中的依赖:" && \
-    cat package.json | grep "@lesheng/elpis" && \
-    echo "" && \
-    echo "检查 npm list:" && \
-    npm list @lesheng/elpis
+    npm ci --production=false || npm install --production=false
 
 # 再复制其他代码文件
 COPY . /app/elpis-demo
