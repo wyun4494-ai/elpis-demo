@@ -11,7 +11,8 @@ WORKDIR /app/elpis-demo
 COPY package*.json /app/elpis-demo/
 
 # 安装依赖（利用缓存，只有 package.json 变化时才重新安装）
-RUN npm config set registry https://registry.npmmirror.com && \
+# 使用官方 npm registry 确保能获取最新发布的包
+RUN npm config set registry https://registry.npmjs.org && \
     npm install --production=false
 
 # 再复制其他代码文件
