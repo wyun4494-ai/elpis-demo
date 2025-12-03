@@ -6,7 +6,15 @@ const versionConfigPath = path.join(__dirname, '../.elpis-version.json');
 const packageJson = require(packageJsonPath);
 
 const mode = process.argv[2]; // 'dev' 或 'prod'
-const specifiedVersion = process.argv[3]; // 可选：指定版本号
+// npm run setup:prod -- ^1.2.0 时，参数会在 process.argv[3] 之后
+// 需要找到第一个不是 'prod' 或 'dev' 的参数
+let specifiedVersion = null;
+for (let i = 3; i < process.argv.length; i++) {
+  if (process.argv[i] && !process.argv[i].startsWith('-')) {
+    specifiedVersion = process.argv[i];
+    break;
+  }
+}
 
 // 读取或初始化版本配置
 let versionConfig = { prodVersion: '^1.0.7' };
