@@ -47,6 +47,7 @@ module.exports = (app) => {
      * @param {string} [ctx.request.body.desc] - 描述
      * @param {number} [ctx.request.body.sex] - 性别（1-男，2-女）
      * @param {number} [ctx.request.body.role_id] - 角色ID
+     * @param {string} [ctx.request.body.email] - 邮箱地址（可选）
      * @param {string} [ctx.request.body.new_password] - 新密码（可选）
      * @param {string} [ctx.request.body.confirm_password] - 确认密码（可选）
      * @returns {Promise<void>}
@@ -67,6 +68,7 @@ module.exports = (app) => {
         desc,
         sex,
         role_id: roleId,
+        email,
         new_password: newPassword,
         confirm_password: confirmPassword
       } = ctx.request.body
@@ -79,6 +81,7 @@ module.exports = (app) => {
           desc,
           sex,
           role_id: roleId,
+          email,
           new_password: newPassword,
           confirm_password: confirmPassword
         })
@@ -101,6 +104,9 @@ module.exports = (app) => {
      * @param {string} [ctx.request.body.nickname] - 昵称
      * @param {number} [ctx.request.body.sex] - 性别（1-男，2-女）
      * @param {string} [ctx.request.body.desc] - 描述
+     * @param {string} [ctx.request.body.email] - 邮箱地址（可选）
+     * @param {string} [ctx.request.body.new_password] - 自定义密码（可选）
+     * @param {string} [ctx.request.body.confirm_password] - 确认密码（可选）
      * @returns {Promise<void>}
      */
     async createUser(ctx) {
@@ -108,21 +114,32 @@ module.exports = (app) => {
         username,
         nickname,
         sex,
-        desc
+        desc,
+        email,
+        new_password: newPassword,
+        confirm_password: confirmPassword
       } = ctx.request.body
 
       const { user: userService } = app.service
-      const userId = await userService.createUser({
-        username,
-        nickname,
-        sex,
-        desc
-      })
 
-      this.success(ctx, {
-        message: '创建成功',
-        user_id: userId
-      })
+      try {
+        const userId = await userService.createUser({
+          username,
+          nickname,
+          sex,
+          desc,
+          email,
+          new_password: newPassword,
+          confirm_password: confirmPassword
+        })
+
+        this.success(ctx, {
+          message: '创建成功',
+          user_id: userId
+        })
+      } catch (error) {
+        this.fail(ctx, error.message || '创建失败', 400)
+      }
     }
 
     /**
@@ -154,6 +171,10 @@ module.exports = (app) => {
 
         // 格式化时间
         userItem.create_time = moment(userItem.create_time).format('YYYY-MM-DD HH:mm:ss')
+        // 格式化最后登录时间
+        if (userItem.last_login_time) {
+          userItem.last_login_time = moment(userItem.last_login_time).format('YYYY-MM-DD HH:mm:ss')
+        }
 
         this.success(ctx, userItem)
         return
@@ -164,6 +185,8 @@ module.exports = (app) => {
         username,
         nickname,
         sex,
+        email,
+        role_id: roleId,
         create_time_start: createTimeStart,
         create_time_end: createTimeEnd,
         page,
@@ -177,7 +200,9 @@ module.exports = (app) => {
       jobs.push(userService.getUserList({
         username,
         nickname,
-        sex: Number(sex),
+        sex: sex ? Number(sex) : undefined,
+        email,
+        role_id: roleId ? Number(roleId) : undefined,
         createTimeStart,
         createTimeEnd,
         page: Number(page),
@@ -186,7 +211,9 @@ module.exports = (app) => {
       jobs.push(userService.getUserListTotal({
         username,
         nickname,
-        sex,
+        sex: sex ? Number(sex) : undefined,
+        email,
+        role_id: roleId ? Number(roleId) : undefined,
         createTimeStart,
         createTimeEnd,
       }))
@@ -206,6 +233,10 @@ module.exports = (app) => {
         item.sex = item.sex === 1 ? '男' : '女'
         // 格式化时间
         item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss')
+        // 格式化最后登录时间
+        if (item.last_login_time) {
+          item.last_login_time = moment(item.last_login_time).format('YYYY-MM-DD HH:mm:ss')
+        }
       })
       const total = res[1]
 

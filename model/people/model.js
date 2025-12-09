@@ -67,6 +67,28 @@ module.exports = {
               placeholder: '请输入昵称'
             }
           },
+          email: {
+            type: 'string',
+            label: '邮箱',
+            tableOption: {
+              width: 200,
+              'show-overflow-tooltip': true,
+              sortable: true
+            },
+            searchOption: {
+              comType: 'input',
+              placeholder: '请输入邮箱'
+            },
+            createFormOption: {
+              comType: 'input',
+              placeholder: '请输入邮箱地址'
+            },
+            editFormOption: {
+              comType: 'input',
+              placeholder: '请输入邮箱地址'
+            },
+            detailPanelOption: {}
+          },
           desc: {
             type: 'string',
             label: '描述',
@@ -170,6 +192,17 @@ module.exports = {
             type: 'string',
             label: '创建时间',
             tableOption: {},
+            searchOption: {
+              comType: 'dateRange',
+            }
+          },
+          last_login_time: {
+            type: 'string',
+            label: '最后登录时间',
+            tableOption: {
+              width: 180,
+              sortable: true
+            },
             searchOption: {
               comType: 'dateRange',
             }

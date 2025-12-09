@@ -273,16 +273,21 @@ CREATE TABLE IF NOT EXISTS `t_user` (
   `username` VARCHAR(255) NOT NULL COMMENT '账号',
   `password` VARCHAR(255) NOT NULL COMMENT '密码（存储加密后的值）',
   `nickname` VARCHAR(255) NOT NULL COMMENT '昵称',
+  `email` VARCHAR(255) COMMENT '邮箱地址',
   `sex` INT NOT NULL COMMENT '性别：1-男，2-女，3-其他',
   `desc` VARCHAR(255) COMMENT '用户描述（简介/备注）',
   `status` INT DEFAULT 1 NOT NULL COMMENT '状态：1-正常，-1-删除',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
   `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `last_login_time` DATETIME COMMENT '最后登录时间',
 
   UNIQUE KEY `uk_t_user_user_id` (`user_id`),
   UNIQUE KEY `uk_t_user_username_status` (`username`, `status`),
+  UNIQUE KEY `uk_t_user_email_status` (`email`, `status`),
   KEY `idx_t_user_id` (`id`),
-  KEY `idx_t_user_status` (`status`)
+  KEY `idx_t_user_status` (`status`),
+  KEY `idx_t_user_email` (`email`),
+  KEY `idx_t_user_last_login_time` (`last_login_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户信息表';
 
 -- ================================================================

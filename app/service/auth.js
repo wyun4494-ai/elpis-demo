@@ -83,6 +83,7 @@ module.exports = (app) => {
      * - 验证用户名是否存在
      * - 使用 bcrypt 验证密码
      * - 生成 JWT Token（根据 remember 参数设置过期时间）
+     * - 更新用户的最后登录时间
      * - 返回用户信息和 Token
      *
      * @param {Object} params - 登录参数
@@ -112,7 +113,14 @@ module.exports = (app) => {
         throw new Error('用户名或密码错误');
       }
 
-      // 3. 生成 JWT Token
+      // 3. 更新最后登录时间
+      await app.database('t_user')
+        .where('user_id', user.user_id)
+        .update({
+          last_login_time: moment().format('YYYY-MM-DD HH:mm:ss')
+        });
+
+      // 4. 生成 JWT Token
       const jwtSecret = app.config.jwtSecretKey;
       const expiresIn = remember ? '7d' : '1d'; // 记住我：7天，否则1天
 
@@ -126,7 +134,7 @@ module.exports = (app) => {
         { expiresIn }
       );
 
-      // 4. 返回用户信息（不含密码）
+      // 5. 返回用户信息（不含密码）
       const userInfo = {
         user_id: user.user_id,
         username: user.username,

@@ -13,7 +13,9 @@ module.exports = {
           pageSize: { type: 'string' },
           username: { type: 'string' },
           nickname: { type: 'string' },
-          sex: { type: 'number' },
+          sex: { type: 'string' },
+          email: { type: 'string' },
+          role_id: { type: 'string' },
           create_time_start: { type: 'string' },
           create_time_end: { type: 'string' }
         },
@@ -33,7 +35,9 @@ module.exports = {
           pageSize: { type: 'string' },
           username: { type: 'string' },
           nickname: { type: 'string' },
-          sex: { type: 'number' },
+          sex: { type: 'string' },
+          email: { type: 'string' },
+          role_id: { type: 'string' },
           create_time_start: { type: 'string' },
           create_time_end: { type: 'string' }
         }
@@ -46,7 +50,10 @@ module.exports = {
           username: { type: 'string' },
           nickname: { type: 'string' },
           sex: { type: 'number' },
-          desc: { type: 'string' }
+          desc: { type: 'string' },
+          email: { type: 'string' },
+          new_password: { type: 'string', minLength: 6 },
+          confirm_password: { type: 'string' }
         },
         required: ['username']
       }
@@ -60,6 +67,7 @@ module.exports = {
           desc: { type: 'string' },
           sex: { type: 'number' },
           role_id: { type: 'number' },
+          email: { type: 'string' },
           new_password: { type: 'string', minLength: 6 },
           confirm_password: { type: 'string' }
         },
@@ -93,7 +101,10 @@ module.exports = {
           nickname: { type: 'string' },
           sex: { type: 'number' },
           desc: { type: 'string' },
-          role_id: { type: 'number' }
+          role_id: { type: 'number' },
+          email: { type: 'string' },
+          new_password: { type: 'string', minLength: 6 },
+          confirm_password: { type: 'string' }
         }
       }
     },
