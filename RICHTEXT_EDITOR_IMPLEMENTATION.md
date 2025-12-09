@@ -16,12 +16,12 @@
 - 在商品添加和编辑表单的第二步显示
 
 ### 涉及文件
-1. **数据库脚本**：`elpis-demo/database/03_add_product_detail.sql`
+1. **数据库脚本**：`schema-hub/database/03_add_product_detail.sql`
 2. **前端组件**：`elpis/app/pages/widgets/schema-form/complex-view/tiptap-editor/tiptap-editor.vue`
 3. **组件注册**：`elpis/app/pages/widgets/schema-form/form-item-config.js`
-4. **Schema 配置**：`elpis-demo/model/business/model.js`
-5. **后端 Service**：`elpis-demo/app/service/business.js`
-6. **参数验证**：`elpis-demo/app/router-schema/business.js`
+4. **Schema 配置**：`schema-hub/model/business/model.js`
+5. **后端 Service**：`schema-hub/app/service/business.js`
+6. **参数验证**：`schema-hub/app/router-schema/business.js`
 
 ---
 
@@ -36,7 +36,7 @@
 mysql -u root -p
 
 # 执行脚本
-source d:/Elpis/elpis-demo/database/03_add_product_detail.sql
+source d:/Elpis/schema-hub/database/03_add_product_detail.sql
 ```
 
 **或者直接执行 SQL**：
@@ -87,16 +87,16 @@ npm run build
 
 **说明**：
 - 由于修改了框架核心文件（`form-item-config.js` 和新增了 `tiptap-editor.vue`），需要重新构建
-- 构建完成后，elpis-demo 项目会自动使用最新的框架代码
+- 构建完成后，schema-hub 项目会自动使用最新的框架代码
 
 ---
 
-### 步骤 4：重启 elpis-demo 服务
+### 步骤 4：重启 schema-hub 服务
 
 **操作**：重启开发服务器
 
 ```bash
-cd d:/Elpis/elpis-demo
+cd d:/Elpis/schema-hub
 npm run dev
 ```
 
@@ -106,7 +106,7 @@ npm run dev
 
 ### 1. 数据库修改
 
-**文件**：`elpis-demo/database/03_add_product_detail.sql`
+**文件**：`schema-hub/database/03_add_product_detail.sql`
 
 **修改内容**：
 ```sql
@@ -207,7 +207,7 @@ const FormItemConfig = {
 
 ### 4. Schema 配置
 
-**文件**：`elpis-demo/model/business/model.js`
+**文件**：`schema-hub/model/business/model.js`
 
 **修改内容**：
 ```javascript
@@ -234,7 +234,7 @@ product_detail: {
 
 ### 5. 后端 Service 修改
 
-**文件**：`elpis-demo/app/service/business.js`
+**文件**：`schema-hub/app/service/business.js`
 
 **修改内容**：
 
@@ -298,7 +298,7 @@ async updateProduct(params) {
 
 ### 6. 参数验证修改
 
-**文件**：`elpis-demo/app/router-schema/business.js`
+**文件**：`schema-hub/app/router-schema/business.js`
 
 **修改内容**：
 

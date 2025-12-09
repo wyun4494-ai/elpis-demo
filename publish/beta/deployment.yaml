@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ed-beta
   name: ed-beta-deployment
-  namespace: elpis-demo-beta
+  namespace: schema-hub-beta
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
         app: ed-beta-pod
     spec:
       containers:
-        - image: ccr.ccs.tencentyun.com/elpis-lesheng-demo/elpis-demo:publish-demo-588329e01dd8883c374f35084ec2af97718395f3
+        - image: ccr.ccs.tencentyun.com/elpis-lesheng-demo/schema-hub:publish-demo-588329e01dd8883c374f35084ec2af97718395f3
           name: ed-beta-pod
           ports: 
             - containerPort: 8083

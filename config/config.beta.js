@@ -1,5 +1,5 @@
 module.exports = {
-  name: 'elpis-demo-beta',
+  name: 'schema-hub-beta',
   // 数据库配置
   db: {
     client: 'mysql',

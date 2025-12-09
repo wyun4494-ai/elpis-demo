@@ -1,7 +1,7 @@
 const { serverStart } = require('@lesheng/elpis');
 
 const _app = serverStart({
-  name: 'ElpisDemo',
+  name: 'SchemaHub',
   icon: 'static/logo.png',
   homePage: '/view/project-list'
 })

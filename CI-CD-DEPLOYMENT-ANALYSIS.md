@@ -12,7 +12,7 @@
 **❌ 问题**：本地文件路径依赖在 Docker 构建环境中**无法正常工作**
 
 **原因**：
-1. Docker 构建时，只复制 `elpis-demo` 目录到容器
+1. Docker 构建时，只复制 `schema-hub` 目录到容器
 2. 相对路径 `../elpis` 指向的父目录不存在
 3. `npm install` 会失败，报错：`ENOENT: no such file or directory`
 
@@ -22,7 +22,7 @@
 
 #### 步骤 1：在本地切换到生产模式
 ```bash
-# 在 elpis-demo 目录执行
+# 在 schema-hub 目录执行
 npm run setup:prod -- ^1.2.0
 ```
 
@@ -57,7 +57,7 @@ cat package.json | grep "@lesheng/elpis"
 
 ### 2.1 Dockerfile 检查结果
 
-**文件**：`elpis-demo/publish/prod/Dockerfile` 和 `elpis-demo/publish/beta/Dockerfile`
+**文件**：`schema-hub/publish/prod/Dockerfile` 和 `schema-hub/publish/beta/Dockerfile`
 
 **✅ 当前配置正确**，无需修改
 
@@ -71,7 +71,7 @@ cat package.json | grep "@lesheng/elpis"
 
 ### 2.2 Kubernetes 部署配置
 
-**文件**：`elpis-demo/publish/prod/deployment.yaml` 和 `elpis-demo/publish/beta/deployment.yaml`
+**文件**：`schema-hub/publish/prod/deployment.yaml` 和 `schema-hub/publish/beta/deployment.yaml`
 
 需要查看这些文件的内容
 
@@ -90,7 +90,7 @@ cat package.json | grep "@lesheng/elpis"
 
 ### 第 1 步：切换依赖配置
 ```bash
-cd d:\Elpis\elpis-demo
+cd d:\Elpis\schema-hub
 npm run setup:prod -- ^1.2.0
 ```
 

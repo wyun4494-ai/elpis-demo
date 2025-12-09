@@ -1,1 +1,1 @@
-#elpis-demo
+#schema-hub

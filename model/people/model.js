@@ -176,7 +176,12 @@ module.exports = {
           },
           new_password: {
             type: 'string',
-            label: '新密码',
+            label: '密码',
+            createFormOption: {
+              comType: 'password-input',
+              placeholder: '请输入密码（至少6位）',
+              minLength: 6
+            },
             editFormOption: {
               comType: 'password-input',
               placeholder: '请输入新密码（至少6位）',
@@ -186,6 +191,10 @@ module.exports = {
           confirm_password: {
             type: 'string',
             label: '确认密码',
+            createFormOption: {
+              comType: 'password-input',
+              placeholder: '请再次输入密码'
+            },
             editFormOption: {
               comType: 'password-input',
               placeholder: '请再次输入新密码'

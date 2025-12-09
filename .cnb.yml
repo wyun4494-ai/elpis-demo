@@ -7,7 +7,7 @@ publish-demo:
       services:
         - docker
       env:
-        DOCKER_IMAGE_NAME: elpis-demo-image-beta
+        DOCKER_IMAGE_NAME: schema-hub-image-beta
         # 镜像版本：分支名-提交哈希（保持不变）
         DOCKER_IMAGE_VERSION: ${CNB_BRANCH}-${CNB_COMMIT}
         DOCKERFILE_PATH: ./publish/beta/Dockerfile
@@ -15,7 +15,7 @@ publish-demo:
         # 新增镜像仓库路径变量（与腾讯云仓库一致）
         DOCKER_REGISTRY: ccr.ccs.tencentyun.com
         DOCKER_NAMESPACE: elpis-lesheng-demo  # 腾讯云仓库命名空间
-        DOCKER_REPO: elpis-demo               # 腾讯云仓库名称
+        DOCKER_REPO: schema-hub               # 腾讯云仓库名称
       stages:
         - name: docker login
           # 登录命令与腾讯云快捷指令一致（用户名使用UIN）
@@ -44,7 +44,7 @@ publish-prod:
       services:
         - docker
       env:
-        DOCKER_IMAGE_NAME: elpis-demo-image-prod
+        DOCKER_IMAGE_NAME: schema-hub-image-prod
         # 镜像版本：分支名-提交哈希（保持不变）
         DOCKER_IMAGE_VERSION: ${CNB_BRANCH}-${CNB_COMMIT}
         DOCKERFILE_PATH: ./publish/prod/Dockerfile
@@ -52,7 +52,7 @@ publish-prod:
         # 新增镜像仓库路径变量（与腾讯云仓库一致）
         DOCKER_REGISTRY: ccr.ccs.tencentyun.com
         DOCKER_NAMESPACE: elpis-lesheng-demo-prod  # 腾讯云仓库命名空间
-        DOCKER_REPO: elpis-demo-prod            # 腾讯云仓库名称
+        DOCKER_REPO: schema-hub-prod            # 腾讯云仓库名称
       stages:
         - name: docker login
           # 登录命令与腾讯云快捷指令一致（用户名使用UIN）

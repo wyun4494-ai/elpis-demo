@@ -1,5 +1,5 @@
 module.exports = {
-  name: 'elpis-demo',
+  name: 'schema-hub',
   jwtSecretKey: '822f838d62b39a5829f71df015f89b6f',
   // 数据库配置
   db: {

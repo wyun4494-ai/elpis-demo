@@ -4,7 +4,7 @@
  *
  * 使用方法:
  * 1. 确保 MySQL 数据库已启动
- * 2. 在 elpis-demo 目录运行: node test/database-performance.test.js
+ * 2. 在 schema-hub 目录运行: node test/database-performance.test.js
  */
 
 const mysql = require('mysql2/promise');

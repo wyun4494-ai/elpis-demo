@@ -2,13 +2,13 @@
 FROM node:18
 
 # 创建工作目录
-RUN mkdir -p /app/elpis-demo
+RUN mkdir -p /app/schema-hub
 
 # 进入工作目录
-WORKDIR /app/elpis-demo
+WORKDIR /app/schema-hub
 
 # 先复制 package.json 文件，利用 Docker 缓存
-COPY package*.json /app/elpis-demo/
+COPY package*.json /app/schema-hub/
 
 # 安装依赖（利用缓存，只有 package.json 变化时才重新安装）
 # 使用官方 npm registry 确保能获取最新发布的包
@@ -17,7 +17,7 @@ RUN npm config set registry https://registry.npmjs.org && \
     npm ci --production=false || npm install --production=false
 
 # 再复制其他代码文件
-COPY . /app/elpis-demo
+COPY . /app/schema-hub
 
 # 构建前端资源（生产环境构建）
 RUN echo "========== 开始构建前端资源 ==========" && \

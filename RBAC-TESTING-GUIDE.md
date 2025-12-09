@@ -12,16 +12,16 @@ RBAC 系统的数据库脚本需要按以下顺序执行：
 
 ```bash
 # 1. 初始化所有表结构（包含软删除唯一性约束修复）
-mysql -u root -p elpis_beta < elpis-demo/database/00_init_all_tables.sql
+mysql -u root -p elpis_beta < schema-hub/database/00_init_all_tables.sql
 
 # 2. 初始化测试数据
-mysql -u root -p elpis_beta < elpis-demo/database/01_init_test_data.sql
+mysql -u root -p elpis_beta < schema-hub/database/01_init_test_data.sql
 
 # 3. 初始化角色和权限配置（包含角色表软删除约束修复）
-mysql -u root -p elpis_beta < elpis-demo/database/03_init_role_permission.sql
+mysql -u root -p elpis_beta < schema-hub/database/03_init_role_permission.sql
 
 # 4. 更新人员管理系统项目标识（从 business 改为 business-personnel）
-mysql -u root -p elpis_beta < elpis-demo/database/04_update_personnel_project_key.sql
+mysql -u root -p elpis_beta < schema-hub/database/04_update_personnel_project_key.sql
 ```
 
 **关键变更**：
@@ -247,7 +247,7 @@ curl -X GET "http://localhost:8083/api/proj/user/menu" \
 **解决方案**：
 ```bash
 # 重新执行 SQL 脚本
-mysql -u root -p elpis_beta < elpis-demo/database/03_init_role_permission.sql
+mysql -u root -p elpis_beta < schema-hub/database/03_init_role_permission.sql
 ```
 
 ### 问题 2：用户仍然可以访问无权限的项目

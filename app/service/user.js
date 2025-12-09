@@ -101,27 +101,53 @@ module.exports = (app) => {
      *
      * 业务规则：
      * - 自动生成 UUID 作为用户ID
-     * - 自动生成随机密码（10位，包含数字、符号、大小写字母）
+     * - 如果提供了密码，使用提供的密码；否则自动生成随机密码（10位，包含数字、符号、大小写字母）
      *
      * @param {Object} data - 用户数据
      * @param {string} data.username - 用户名
      * @param {string} data.nickname - 昵称
      * @param {number} data.sex - 性别（1-男，2-女）
      * @param {string} [data.desc] - 描述
+     * @param {string} [data.new_password] - 自定义密码（可选）
+     * @param {string} [data.confirm_password] - 确认密码（可选）
      * @returns {Promise<string>} 返回新创建的用户ID
+     * @throws {Error} 如果密码和确认密码不一致，或密码为空字符串
      */
-    async createUser({ username, nickname, sex, desc }) {
+    async createUser({ username, nickname, sex, desc, new_password: newPassword, confirm_password: confirmPassword }) {
       // 1. 生成用户ID（UUID，去掉连字符）
       const userId = uuidv4().replace(/-/g, '')
 
-      // 2. 生成随机密码（10位，包含数字、符号、大小写字母）
-      const password = generatePassword.generate({
-        length: 10,
-        numbers: true,
-        symbols: true,
-        uppercase: true,
-        lowercase: true
-      })
+      // 2. 处理密码
+      let password
+      if (newPassword !== undefined && newPassword !== null && newPassword !== '') {
+        // 2.1 验证密码不能为空字符串
+        if (newPassword.trim() === '') {
+          throw new Error('密码不能为空')
+        }
+
+        // 2.2 验证密码长度至少 6 位
+        if (newPassword.length < 6) {
+          throw new Error('密码长度至少 6 位')
+        }
+
+        // 2.3 验证密码和确认密码一致
+        if (newPassword !== confirmPassword) {
+          throw new Error('密码和确认密码不一致')
+        }
+
+        // 2.4 使用 bcrypt 加密密码
+        password = await bcrypt.hash(newPassword, 10)
+      } else {
+        // 2.5 自动生成随机密码（10位，包含数字、符号、大小写字母）
+        const randomPassword = generatePassword.generate({
+          length: 10,
+          numbers: true,
+          symbols: true,
+          uppercase: true,
+          lowercase: true
+        })
+        password = await bcrypt.hash(randomPassword, 10)
+      }
 
       // 3. 插入数据库
       await app.database('t_user').insert({

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ed-prod-deployment
-  namespace: elpis-demo-prod
+  namespace: schema-hub-prod
 spec:
   replicas: 1
   selector:
@@ -14,8 +14,8 @@ spec:
         app: ed-prod-pod
     spec:
       containers:
-      - name: elpis-demo-prod
-        image: ccr.ccs.tencentyun.com/elpis-lesheng-demo/elpis-demo:publish-prod-latest
+      - name: schema-hub-prod
+        image: ccr.ccs.tencentyun.com/elpis-lesheng-demo/schema-hub:publish-prod-latest
         ports:
         - containerPort: 8083
         env:
