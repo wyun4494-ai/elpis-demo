@@ -6,6 +6,9 @@ module.exports = {
     key: 'user',
     name: '管理员管理'
   }, {
+    key: 'customer',
+    name: '用户管理'
+  }, {
     key: 'role',
     name: '角色管理'
   }]

@@ -16,8 +16,7 @@ module.exports = {
             label: '用户ID',
             tableOption: {
               width: 200,
-              'show-overflow-tooltip': true,
-              sortable: true
+              'show-overflow-tooltip': true
             }
           },
           username: {
@@ -25,8 +24,7 @@ module.exports = {
             label: '账号',
             tableOption: {
               width: 200,
-              'show-overflow-tooltip': true,
-              sortable: true
+              'show-overflow-tooltip': true
             },
             searchOption: {
               comType: 'input',
@@ -52,8 +50,7 @@ module.exports = {
             label: '昵称',
             tableOption: {
               width: 200,
-              'show-overflow-tooltip': true,
-              sortable: true
+              'show-overflow-tooltip': true
             },
             editFormOption: {
               comType: 'input',
@@ -72,8 +69,7 @@ module.exports = {
             label: '邮箱',
             tableOption: {
               width: 200,
-              'show-overflow-tooltip': true,
-              sortable: true
+              'show-overflow-tooltip': true
             },
             searchOption: {
               comType: 'input',
@@ -105,8 +101,7 @@ module.exports = {
             label: '性别',
             tableOption: {
               width: 150,
-              'show-overflow-tooltip': true,
-              sortable: true
+              'show-overflow-tooltip': true
             },
             searchOption: {
               comType: 'select',
@@ -148,7 +143,6 @@ module.exports = {
             tableOption: {
               width: 150,
               'show-overflow-tooltip': true,
-              sortable: true,
               comType: 'textFormat',
               formatMap: {
                 1: '超级管理员',
@@ -288,6 +282,308 @@ module.exports = {
       }
     }
   }, {
+    key: 'customer',
+    name: '用户管理',
+    menuType: 'module',
+    moduleType: 'schema',
+    schemaConfig: {
+      api: '/api/proj/customer',
+      schema: {
+        type: 'object',
+        properties: {
+          customer_id: {
+            type: 'string',
+            label: '客户ID',
+            tableOption: {
+              minWidth: 180,
+              'show-overflow-tooltip': true
+            }
+          },
+          username: {
+            type: 'string',
+            label: '用户名',
+            tableOption: {
+              minWidth: 120,
+              'show-overflow-tooltip': true
+            },
+            searchOption: {
+              comType: 'input',
+              placeholder: '请输入用户名'
+            },
+            createFormOption: {
+              comType: 'input',
+              placeholder: '请输入用户名',
+              required: true
+            },
+            editFormOption: {
+              comType: 'input',
+              disabled: true
+            },
+            detailPanelOption: {}
+          },
+          password: {
+            type: 'string',
+            label: '密码',
+            detailPanelOption: {}
+          },
+          nickname: {
+            type: 'string',
+            label: '昵称',
+            tableOption: {
+              minWidth: 120,
+              'show-overflow-tooltip': true
+            },
+            searchOption: {
+              comType: 'input',
+              placeholder: '请输入昵称'
+            },
+            createFormOption: {
+              comType: 'input',
+              placeholder: '请输入昵称'
+            },
+            editFormOption: {
+              comType: 'input'
+            },
+            detailPanelOption: {}
+          },
+          email: {
+            type: 'string',
+            label: '邮箱',
+            tableOption: {
+              minWidth: 150,
+              'show-overflow-tooltip': true
+            },
+            searchOption: {
+              comType: 'input',
+              placeholder: '请输入邮箱'
+            },
+            createFormOption: {
+              comType: 'input',
+              placeholder: '请输入邮箱地址'
+            },
+            editFormOption: {
+              comType: 'input',
+              placeholder: '请输入邮箱地址'
+            },
+            detailPanelOption: {}
+          },
+          phone: {
+            type: 'string',
+            label: '手机号',
+            tableOption: {
+              minWidth: 120,
+              'show-overflow-tooltip': true
+            },
+            searchOption: {
+              comType: 'input',
+              placeholder: '请输入手机号'
+            },
+            createFormOption: {
+              comType: 'input',
+              placeholder: '请输入手机号'
+            },
+            editFormOption: {
+              comType: 'input'
+            },
+            detailPanelOption: {}
+          },
+          sex: {
+            type: 'number',
+            label: '性别',
+            tableOption: {
+              width: 80,
+              'show-overflow-tooltip': true
+            },
+            searchOption: {
+              comType: 'select',
+              enumList: [{
+                label: '全部',
+                value: -999
+              },{
+                label: '男',
+                value: 1
+              },{
+                label: '女',
+                value: 2
+              },{
+                label: '其他',
+                value: 3
+              }]
+            },
+            createFormOption: {
+              comType: 'select',
+              enumList: [{
+                label: '男',
+                value: 1
+              },{
+                label: '女',
+                value: 2
+              },{
+                label: '其他',
+                value: 3
+              }]
+            },
+            editFormOption: {
+              comType: 'select',
+              enumList: [{
+                label: '男',
+                value: 1
+              },{
+                label: '女',
+                value: 2
+              },{
+                label: '其他',
+                value: 3
+              }]
+            }
+          },
+          avatar: {
+            type: 'string',
+            label: '头像',
+            tableOption: {
+              width: 80,
+              comType: 'image',
+              imageSize: 40
+            },
+            createFormOption: {
+              comType: 'upload',
+              uploadUrl: '/api/upload/image',
+              accept: 'image/*',
+              limit: 1,
+              maxSize: 500
+            },
+            editFormOption: {
+              comType: 'upload',
+              uploadUrl: '/api/upload/image',
+              accept: 'image/*',
+              limit: 1,
+              maxSize: 500
+            },
+            detailPanelOption: {}
+          },
+          address: {
+            type: 'string',
+            label: '收货地址',
+            createFormOption: {
+              comType: 'textarea',
+              placeholder: '请输入收货地址'
+            },
+            editFormOption: {
+              comType: 'textarea'
+            },
+            detailPanelOption: {}
+          },
+          create_time: {
+            type: 'string',
+            label: '创建时间',
+            tableOption: {
+              width: 180,
+              sortable: 'custom'
+            },
+            searchOption: {
+              comType: 'dateRange'
+            }
+          },
+          last_login_time: {
+            type: 'string',
+            label: '最后登录时间',
+            tableOption: {
+              width: 180,
+              sortable: 'custom'
+            },
+            searchOption: {
+              comType: 'dateRange'
+            },
+            detailPanelOption: {}
+          },
+          new_password: {
+            type: 'string',
+            label: '密码',
+            createFormOption: {
+              comType: 'password-input',
+              placeholder: '请输入密码（至少6位）',
+              minLength: 6
+            },
+            editFormOption: {
+              comType: 'password-input',
+              placeholder: '请输入新密码（至少6位）',
+              minLength: 6
+            }
+          },
+          confirm_password: {
+            type: 'string',
+            label: '确认密码',
+            createFormOption: {
+              comType: 'password-input',
+              placeholder: '请再次输入密码'
+            },
+            editFormOption: {
+              comType: 'password-input',
+              placeholder: '请再次输入新密码'
+            }
+          }
+        },
+        required: ['username']
+      },
+      tableConfig: {
+        selectable: true,
+        headerButtons: [{
+          label: '添加用户',
+          type: 'primary',
+          plain: true,
+          eventKey: 'showComponent',
+          eventOption: {
+            comName: 'createForm'
+          }
+        }],
+        batchButtons: [{
+          label: '批量删除',
+          value: 'batchDelete',
+          type: 'danger',
+          eventKey: 'batchDelete'
+        }],
+        rowButtons: [{
+          label: '查看',
+          type: 'primary',
+          eventKey: 'showComponent',
+          eventOption: {
+            comName: 'detailPanel'
+          }
+        },{
+          label: '编辑',
+          type: 'warning',
+          eventKey: 'showComponent',
+          eventOption: {
+            comName: 'editForm'
+          }
+        },{
+          label: '删除',
+          type: 'danger',
+          eventKey: 'remove',
+          eventOption: {
+            params: {
+              customer_id: 'schema::customer_id'
+            }
+          }
+        }]
+      },
+      componentConfig: {
+        createForm: {
+          title: '添加用户',
+          saveBtnText: '保存'
+        },
+        editForm: {
+          mainKey: 'customer_id',
+          title: '编辑用户',
+          saveBtnText: '保存'
+        },
+        detailPanel: {
+          mainKey: 'customer_id',
+          title: '查看用户'
+        }
+      }
+    }
+  }, {
     key: 'role',
     name: '角色管理',
     menuType: 'module',
@@ -302,8 +598,7 @@ module.exports = {
             type: 'number',
             label: '编号',
             tableOption: {
-              width: 70,
-              sortable: true
+              width: 70
             },
             editFormOption: {
               comType: 'input',
@@ -315,8 +610,7 @@ module.exports = {
             label: '角色名称',
             tableOption: {
               width: 150,
-              'show-overflow-tooltip': true,
-              sortable: true
+              'show-overflow-tooltip': true
             },
             searchOption: {
               comType: 'input',
@@ -351,8 +645,7 @@ module.exports = {
             type: 'number',
             label: '用户数量',
             tableOption: {
-              width: 100,
-              sortable: true
+              width: 100
             }
           },
           status: {
