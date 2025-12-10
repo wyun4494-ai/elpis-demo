@@ -4,7 +4,7 @@ module.exports = {
   homePage: '/schema?proj_key=business-personnel&key=user',
   menu: [{
     key: 'user',
-    name: '用户管理'
+    name: '管理员管理'
   }, {
     key: 'role',
     name: '角色管理'
