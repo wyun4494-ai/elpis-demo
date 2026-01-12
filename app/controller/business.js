@@ -313,6 +313,22 @@ module.exports = (app) => {
     }
 
     /**
+     * 获取商品的SKU列表（用于查询参数）
+     */
+    async getProductSkuList(ctx) {
+      const { product_id: productId } = ctx.query;
+      const { business: businessService } = app.service;
+
+      try {
+        const skus = await businessService.getProductSkus(productId);
+        this.success(ctx, skus);
+      } catch (error) {
+        app.logger.error('获取商品SKU列表失败:', error);
+        this.fail(ctx, error.message, 400);
+      }
+    }
+
+    /**
      * 批量更新商品SKU
      */
     async updateProductSkus(ctx) {

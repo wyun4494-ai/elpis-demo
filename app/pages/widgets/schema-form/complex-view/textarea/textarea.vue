@@ -23,13 +23,16 @@
       class="item-value"
     >
       <el-input
-        type="textarea"
-        :rows="5"
         v-model="dotValue"
-        v-bind="schema.option"
+        type="textarea"
         class="component"
         :class=" validTips ? 'valid-border' : '' "
-        :placeholder="placeholder"
+        :placeholder="schema.option?.placeholder || '请输入内容'"
+        :disabled="schema.option?.disabled"
+        :rows="schema.option?.rows || 3"
+        :maxlength="schema.option?.maxlength"
+        :show-word-limit="schema.option?.showWordLimit"
+        @change="onChange"
         @focus="onFocus"
         @blur="onBlur"
       />
@@ -46,6 +49,7 @@
 <script setup>
 import { ref, toRefs, watch, onMounted, inject} from 'vue'
 const ajv = inject('ajv')
+
 const props = defineProps({
   schema: {
     type: Object,
@@ -58,100 +62,67 @@ const props = defineProps({
   model: {
     type: [String, Number, Boolean, Object],
     default: undefined
-  },
+  }
 })
-const { schema, schemaKey} = props
+
+const { schema, schemaKey } = props
 const { model } = toRefs(props)
 
 const name = ref('textarea')
 const dotValue = ref()
-const validTips = ref(null)
-const placeholder = ref('')
+const validTips = ref('')
 
-// 初始化数据
-const initData = () => { 
-  // 如果有model值，使用model值，否则使用schema中定义的默认值
+/**
+ * 初始化数据
+ */
+const initData = () => {
   dotValue.value = model.value !== undefined ? model.value : schema.option?.default
-  validTips.value = null
-
-  const { minLength, maxLength, pattern } = schema
-
-  const ruleList = []
-  if(schema.option?.placeholder){
-    placeholder.value = schema.option.placeholder
-  }
-  if(minLength) {
-    ruleList.push(`最小长度: ${minLength}`)
-  }
-  if(maxLength) {
-    ruleList.push(`最大长度:${maxLength}`)
-  }
-  if(pattern) {
-    ruleList.push(`格式: ${pattern}`)
-  }
-
-  placeholder.value = ruleList.join('|')
+  validTips.value = ''
 }
 
-
-onMounted(() => { 
+onMounted(() => {
   initData()
 })
-watch([model, schema], () => { 
+
+watch([model, schema], () => {
   initData()
-},{
+}, {
   deep: true,
   immediate: true
 })
 
-// 获取表单值
+/**
+ * 获取表单值
+ */
 const getValue = () => {
-  return dotValue.value !== null ? {
+  return dotValue.value !== undefined ? {
     [schemaKey]: dotValue.value
   } : {}
 }
 
-// 表单校验
+/**
+ * 表单校验
+ */
 const validate = () => {
-  validTips.value = null
+  validTips.value = ''
 
-  const { type } = schema
-
-  if(schema.option?.required && !dotValue.value){
+  if (schema.option?.required && !dotValue.value) {
     validTips.value = '请输入内容'
     return false
   }
 
-  // 调用ajv校验schema
-  if(dotValue.value) {
-    const validate = ajv.compile(schema)
-    const valid = validate(dotValue.value)
-    if(!valid && validate.errors && validate.errors[0]) {
-      const { keyword, params} = validate.errors[0]
-      if(keyword === 'type') {
-        validTips.value = `类型必须为${type}，请检查输入`
-      } else if(keyword === 'minLength') {
-        validTips.value = `长度不能小于${params.limit}`
-      } else if(keyword === 'maxLength') {
-        validTips.value = `长度不能大于${params.limit}`
-      } else if(keyword === 'pattern') {
-        validTips.value = `格式错误，请检查输入`
-      } else {
-        console.log(validate.errors[0])
-        validTips.value = '格式错误，请检查输入'
-      }
-      return false 
-    }
-  }
   return true
 }
 
-// 输入框聚焦事件
-const onFocus = () => { 
-  validTips.value = null
+const onFocus = () => {
+  validTips.value = ''
 }
-// 输入框失焦事件
-const onBlur = () => { 
+
+const onBlur = () => {
+  validate()
+}
+
+const onChange = (value) => {
   validate()
 }
 
@@ -163,5 +134,44 @@ defineExpose({
 </script>
 
 <style lang="less" scoped>
+.form-item {
+  width: 100%;
+  margin-bottom: 20px;
 
+  .item-label {
+    width: 120px;
+    font-size: 14px;
+    color: #606266;
+    margin-right: 10px;
+    flex-shrink: 0;
+
+    .required {
+      color: #f56c6c;
+      margin-right: 4px;
+    }
+  }
+
+  .item-value {
+    flex: 1;
+    min-width: 0;
+
+    .component {
+      width: 100%;
+
+      &.valid-border {
+        :deep(.el-textarea__inner) {
+          box-shadow: 0 0 0 1px #f56c6c inset;
+        }
+      }
+    }
+  }
+
+  .valid-tips {
+    width: 100%;
+    font-size: 12px;
+    color: #f56c6c;
+    margin-top: 5px;
+    margin-left: 130px;
+  }
+}
 </style>

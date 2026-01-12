@@ -139,7 +139,20 @@ module.exports = (app) => {
       const productIds = list.map(item => item.product_id);
       const skuStatusMap = await this.getBatchProductStockStatus(productIds);
 
-      // 14. 格式化数据
+      // 14. 批量获取所有商品的最低 SKU 价格（优化性能）
+      const minSkuPrices = await app.database('t_product_sku')
+        .select('product_id')
+        .min('price as min_price')
+        .whereIn('product_id', productIds)
+        .where('status', 1)
+        .groupBy('product_id');
+
+      const minPriceMap = {};
+      minSkuPrices.forEach(item => {
+        minPriceMap[item.product_id] = item.min_price;
+      });
+
+      // 15. 格式化数据
       list.forEach(item => {
         // 格式化时间
         item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
@@ -147,6 +160,11 @@ module.exports = (app) => {
         // 将 decimal 类型转换为数字
         item.price = parseFloat(item.price);
         item.inventory = parseInt(item.inventory);
+
+        // 优先使用 SKU 最低价格，如果没有 SKU 则使用商品价格
+        if (minPriceMap[item.product_id] !== undefined && minPriceMap[item.product_id] !== null) {
+          item.price = parseFloat(minPriceMap[item.product_id]);
+        }
 
         // 确保状态字段是数字类型
         item.status = parseInt(item.status);
@@ -510,6 +528,14 @@ module.exports = (app) => {
             update_time: new Date()
           });
       }
+
+      // 更新商品的审核状态为待审核（编辑 SKU 后需要重新审核）
+      await app.database('t_product')
+        .where('product_id', productId)
+        .update({
+          audit_status: 0,  // 0-未审核
+          update_time: new Date()
+        });
 
       return true;
     }
@@ -1282,7 +1308,7 @@ module.exports = (app) => {
     }
 
     /**
-     * 远程搜索商品（根据关键字模糊匹配商品名称）
+     * 远程搜索商品（根据关键字模糊匹配商品名称或货号）
      */
     async searchProduct(params) {
       const { keyword = '', page = 1, pageSize = 50 } = params;
@@ -1292,20 +1318,20 @@ module.exports = (app) => {
         return [];
       }
 
-      // 模糊查询商品名称
+      // 模糊查询商品名称或货号
       const list = await app.database('t_product')
-        .select('product_id', 'product_name')
+        .select('product_id', 'product_name', 'item_number', 'price', 'inventory')
         .where('status', 1)
-        .where('product_name', 'like', `%${keyword}%`)
+        .where(function() {
+          this.where('product_name', 'like', `%${keyword}%`)
+            .orWhere('item_number', 'like', `%${keyword}%`)
+        })
         .limit(parseInt(pageSize))
         .offset((parseInt(page) - 1) * parseInt(pageSize))
         .orderBy('create_time', 'desc');
 
-      // 转换为 remote-select 需要的格式
-      return list.map(item => ({
-        label: item.product_name,
-        value: item.product_name  // 搜索时使用商品名称作为值
-      }));
+      // 返回完整的商品信息
+      return list;
     }
   };
 };

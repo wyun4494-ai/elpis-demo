@@ -437,6 +437,48 @@ module.exports = (app) => {
         category_l4_id: pathIds[3] || null
       };
     }
+
+    /**
+     * 获取分类树形结构（用于级联选择器）
+     */
+    async getCategoryTree() {
+      // 查询所有启用的分类
+      const allCategories = await app.database('t_product_category')
+        .where('status', 1)
+        .orderBy('sort_order', 'asc')
+        .select('category_id', 'category_name', 'parent_id', 'level', 'has_children', 'full_name');
+
+      // 构建树形结构
+      const buildTree = (parentId = null) => {
+        const nodes = allCategories
+          .filter(cat => cat.parent_id === parentId)
+          .map(cat => {
+            const node = {
+              category_id: cat.category_id,
+              category_name: cat.category_name,
+              full_name: cat.full_name,
+              level: cat.level,
+              has_children: cat.has_children
+            };
+
+            // 如果有子分类，递归构建
+            if (cat.has_children) {
+              const children = buildTree(cat.category_id);
+              if (children.length > 0) {
+                node.children = children;
+              }
+            }
+
+            return node;
+          });
+        
+        return nodes;
+      };
+
+      const tree = buildTree();
+      
+      return tree;
+    }
   };
 };
 

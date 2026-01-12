@@ -137,6 +137,13 @@ module.exports = (app) => {
       const { category: categoryService } = app.service;
       
       try {
+        // 如果没有传参数，返回树形结构
+        if (!parent_id && !level) {
+          const tree = await categoryService.getCategoryTree();
+          return this.success(ctx, tree);
+        }
+
+        // 否则返回扁平数据
         const children = await categoryService.getCategoryChildren(parent_id, level);
         this.success(ctx, children);
       } catch (error) {

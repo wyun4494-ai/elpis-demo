@@ -236,31 +236,37 @@ module.exports = (app) => {
       page,
       pageSize
     }) {
-      const queryObj = { status: app.status.NORMAL }
+      const queryObj = { 't_user.status': app.status.NORMAL }
       if(username) {
-        queryObj.username = username
+        queryObj['t_user.username'] = username
       }
       if(nickname) {
-        queryObj.nickname = nickname
+        queryObj['t_user.nickname'] = nickname
       }
       // sex 需要转换为数字，并排除 -999（表示"全部"）
       if(sex !== undefined && sex !== null && sex !== '' && sex !== -999) {
-        queryObj.sex = Number(sex)
+        queryObj['t_user.sex'] = Number(sex)
       }
       if(email) {
-        queryObj.email = email
+        queryObj['t_user.email'] = email
       }
       if(roleId !== undefined && roleId !== null && roleId !== '' && roleId !== -999) {
-        queryObj.role_id = roleId
+        queryObj['t_user.role_id'] = roleId
       }
 
-      let sql = app.database('t_user').select('*').where(queryObj)
+      let sql = app.database('t_user')
+        .leftJoin('t_role', 't_user.role_id', 't_role.role_id')
+        .select(
+          't_user.*',
+          't_role.role_name'
+        )
+        .where(queryObj)
 
       if(createTimeStart) {
-        sql = sql.andWhere('create_time', '>=', createTimeStart)
+        sql = sql.andWhere('t_user.create_time', '>=', createTimeStart)
       }
       if(createTimeEnd) {
-        sql = sql.andWhere('create_time', '<=', createTimeEnd)
+        sql = sql.andWhere('t_user.create_time', '<=', createTimeEnd)
       }
       const offset = (page - 1) * pageSize
       sql = sql.offset(offset).limit(pageSize)

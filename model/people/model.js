@@ -138,48 +138,51 @@ module.exports = {
             }
           },
           role_id: {
-            type: 'number',
+            type: 'string',
             label: '角色',
             tableOption: {
-              width: 150,
-              'show-overflow-tooltip': true,
-              comType: 'textFormat',
-              formatMap: {
-                1: '超级管理员',
-                2: '审核管理员',
-                3: '商品管理员',
-                4: '订单管理员'
-              }
+              visible: false  // 隐藏 role_id 列
             },
             searchOption: {
               comType: 'select',
               enumList: [
-                { label: '全部', value: -999 },
-                { label: '超级管理员', value: 1 },
-                { label: '审核管理员', value: 2 },
-                { label: '商品管理员', value: 3 },
-                { label: '订单管理员', value: 4 }
+                { label: '全部', value: '' },
+                { label: '超级管理员', value: '1' },
+                { label: '运营人员', value: '2' },
+                { label: '客服人员', value: '3' },
+                { label: '审核人员', value: '4' },
+                { label: '财务人员', value: '5' }
               ]
             },
             createFormOption: {
               comType: 'select',
               enumList: [
-                { label: '超级管理员', value: 1 },
-                { label: '审核管理员', value: 2 },
-                { label: '商品管理员', value: 3 },
-                { label: '订单管理员', value: 4 }
+                { label: '超级管理员', value: '1' },
+                { label: '运营人员', value: '2' },
+                { label: '客服人员', value: '3' },
+                { label: '审核人员', value: '4' },
+                { label: '财务人员', value: '5' }
               ],
               required: true
             },
             editFormOption: {
               comType: 'select',
               enumList: [
-                { label: '超级管理员', value: 1 },
-                { label: '审核管理员', value: 2 },
-                { label: '商品管理员', value: 3 },
-                { label: '订单管理员', value: 4 }
+                { label: '超级管理员', value: '1' },
+                { label: '运营人员', value: '2' },
+                { label: '客服人员', value: '3' },
+                { label: '审核人员', value: '4' },
+                { label: '财务人员', value: '5' }
               ],
               required: true
+            }
+          },
+          role_name: {
+            type: 'string',
+            label: '角色',
+            tableOption: {
+              width: 150,
+              'show-overflow-tooltip': true
             }
           },
           create_time: {

@@ -89,22 +89,22 @@ module.exports = (app) => {
 
       // 4. 构建更新对象（只更新传入的字段）
       const updateObj = {}
-      if (nickname) {
+      if (nickname !== undefined && nickname !== null) {
         updateObj.nickname = nickname
       }
-      if (sex && sex !== -999) {
+      if (sex !== undefined && sex !== null && sex !== -999) {
         updateObj.sex = sex
       }
-      if (email !== undefined) {
+      if (email !== undefined && email !== null) {
         updateObj.email = email
       }
-      if (phone !== undefined) {
+      if (phone !== undefined && phone !== null) {
         updateObj.phone = phone
       }
       if (avatar !== undefined) {
         updateObj.avatar = avatar
       }
-      if (address !== undefined) {
+      if (address !== undefined && address !== null) {
         updateObj.address = address
       }
 

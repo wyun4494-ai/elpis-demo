@@ -29,6 +29,7 @@ module.exports = (app, router) => {
   // SKU管理路由
   router.get('/api/proj/product/:product_id/skus', businessController.getProductSkus.bind(businessController));
   router.put('/api/proj/product/:product_id/skus', businessController.updateProductSkus.bind(businessController));
+  router.get('/api/proj/product/sku/list', businessController.getProductSkuList.bind(businessController));
 
   // 商品参数路由
   router.get('/api/proj/product/:product_id/params', businessController.getProductParams.bind(businessController));

@@ -334,6 +334,19 @@ module.exports = {
                 required: ['product_ids']
               }
             }
+          },
+          '/api/proj/product/sku/list': {
+            get: {
+              query: {
+                type: 'object',
+                properties: {
+                  product_id: {
+                    type: 'string'
+                  }
+                },
+                required: ['product_id']
+              }
+            }
           }
 
   // 注意：带路径参数的 API（如 /api/proj/product/:product_id/skus）

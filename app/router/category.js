@@ -28,5 +28,9 @@ module.exports = (app, router) => {
   // 获取分类路径（级联选择器回显）
   router.get('/api/proj/category/path', 
     categoryController.getCategoryPath.bind(categoryController));
+
+  // 获取分类树（用于级联选择器）
+  router.get('/api/proj/category/tree', 
+    categoryController.getCategoryList.bind(categoryController));
 };
 

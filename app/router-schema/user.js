@@ -50,10 +50,13 @@ module.exports = {
           username: { type: 'string' },
           nickname: { type: 'string' },
           sex: { type: 'number' },
-          desc: { type: 'string' },
-          email: { type: 'string' },
+          desc: { type: ['string', 'null'] },
+          email: { type: ['string', 'null'] },
+          role_id: { type: 'string' },
           new_password: { type: 'string', minLength: 6 },
-          confirm_password: { type: 'string' }
+          confirm_password: { type: 'string' },
+          menu_key: { type: 'string' },
+          proj_key: { type: 'string' }
         },
         required: ['username']
       }
@@ -64,12 +67,14 @@ module.exports = {
         properties: {
           user_id: { type: 'string' },
           nickname: { type: 'string' },
-          desc: { type: 'string' },
+          desc: { type: ['string', 'null'] },
           sex: { type: 'number' },
-          role_id: { type: 'number' },
-          email: { type: 'string' },
+          role_id: { type: 'string' },
+          email: { type: ['string', 'null'] },
           new_password: { type: 'string', minLength: 6 },
-          confirm_password: { type: 'string' }
+          confirm_password: { type: 'string' },
+          menu_key: { type: 'string' },
+          proj_key: { type: 'string' }
         },
         required: ['user_id']
       }
@@ -100,11 +105,13 @@ module.exports = {
         properties: {
           nickname: { type: 'string' },
           sex: { type: 'number' },
-          desc: { type: 'string' },
-          role_id: { type: 'number' },
-          email: { type: 'string' },
+          desc: { type: ['string', 'null'] },
+          role_id: { type: 'string' },
+          email: { type: ['string', 'null'] },
           new_password: { type: 'string', minLength: 6 },
-          confirm_password: { type: 'string' }
+          confirm_password: { type: 'string' },
+          menu_key: { type: 'string' },
+          proj_key: { type: 'string' }
         }
       }
     },
